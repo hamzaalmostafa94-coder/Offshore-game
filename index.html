@@ -2028,6 +2028,62 @@
       animate();
       checkUserRegistration();
     };
+
+    const DRIVE_UPDATE_URL = "https://drive.google.com/file/d/1ENcpssCJdl_hIb0yvUWqHqSPRTtPNZgN/view?usp=sharing";
+
+    // فحص ذكي: إذا كان الشخص يفتح من النسخة القديمة التي لا تملك ميزة الإكسل، نظهر له نافذة التحديث فوراً
+    function checkAndShowUpdateModal() {
+      // النسخة القديمة لا تملك js_api save_to_excel في بايثون
+      const isRunningOldExe = window.pywebview && (!window.pywebview.api || !window.pywebview.api.save_to_excel);
+      
+      // إذا كان يفتح من النسخة القديمة ولم يقم بتخطي التنبيه في هذه الجلسة
+      if (isRunningOldExe && !sessionStorage.getItem('skip_update_notice')) {
+        const modal = document.getElementById('newVersionModal');
+        if (modal) {
+          modal.style.display = 'flex';
+          modal.classList.remove('hidden');
+        }
+      }
+    }
+
+    function openDriveDownload() {
+      window.open(DRIVE_UPDATE_URL, '_blank');
+    }
+
+    function closeUpdateNotice() {
+      sessionStorage.setItem('skip_update_notice', 'true');
+      const modal = document.getElementById('newVersionModal');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+      }
+    }
+
+    // تشغيل الفحص فور تحميل الصفحة
+    window.addEventListener('load', () => {
+      setTimeout(checkAndShowUpdateModal, 1200);
+    });
+
   </script>
+  <!-- نافذة إشعار التحديث التلقائي للمدير والطلاب -->
+  <div id="newVersionModal" class="modal-backdrop hidden" style="z-index: 100002;">
+    <div class="modal-card" style="width: 440px; border: 2px solid var(--accent-cyan);">
+      <div style="font-size: 2.5rem; margin-bottom: -6px;">🚀</div>
+      <h2 style="color: var(--accent-cyan); font-size: 1.25rem;">يتوفر تحديث جديد ورسمي للمحاكي!</h2>
+      <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.6; text-align: justify; background: rgba(16,28,45,0.7); padding: 12px; border-radius: 8px;">
+        تم إطلاق التحديث المعتمد (الإصدار 1.0.1) للمحاكي، ويتضمن:
+        <br>• ميزة تصدير سجل المهندسين كملف Excel منسق على سطح المكتب فوراً.
+        <br>• تثبيت تسجيل الدخول وحفظ السجلات بشكل دائم.
+      </p>
+      <div style="display: flex; gap: 10px; margin-top: 6px;">
+        <button type="button" class="btn-secondary" onclick="closeUpdateNotice()" style="flex: 1;">
+          تخطي ومتابعة اللعب
+        </button>
+        <button type="button" class="action-button" onclick="openDriveDownload()" style="flex: 1.4; background: linear-gradient(135deg, #00d2ff, #0088cc); color: #000; font-weight: bold;">
+          📥 تحميل التحديث الآن
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
