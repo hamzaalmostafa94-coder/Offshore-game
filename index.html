@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>محاكي تركيب منصات الحفر البحرية | Offshore Rig Simulator</title>
+  <style>
+    :root {
+      --bg-dark: #0a0f18;
+      --panel-bg: rgba(13, 23, 38, 0.88);
+      --panel-border: #1e3a5f;
+      --accent-cyan: #00d2ff;
+      --accent-green: #00ff88;
+      --accent-warn: #ffb700;
+      --accent-danger: #ff3344;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    #webgl-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+    .ui-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;
+      pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 16px;
+    }
+    .interactive { pointer-events: auto; }
+
+    .top-bar {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 12px;
+      padding: 10px 20px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .game-title { font-size: 1.15rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px; }
+    .scenario-badge { background: #162a45; border: 1px solid var(--accent-cyan); padding: 4px 12px; border-radius: 6px; font-size: 0.85rem; color: #fff; }
+
+    .resource-meters { display: flex; gap: 20px; align-items: center; }
+    .meter-item { display: flex; flex-direction: column; gap: 3px; min-width: 110px; }
+    .meter-label { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+    .meter-bar-container { height: 7px; background: #1a2636; border-radius: 4px; overflow: hidden; position: relative; }
+    .meter-fill { height: 100%; width: 100%; background: var(--accent-cyan); transition: width 0.3s ease, background 0.3s ease; }
+    .meter-fill.warn { background: var(--accent-warn); }
+    .meter-fill.danger { background: var(--accent-danger); }
+
+    .middle-area { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 10px; flex: 1; pointer-events: none; }
+
+    .telemetry-panel {
+      width: 290px; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 12px;
+      padding: 14px; backdrop-filter: blur(10px); box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      display: flex; flex-direction: column; gap: 12px; pointer-events: auto;
+    }
+    .radar-box {
+      width: 100%; height: 160px; background: #08121e; border: 1px solid #1a3c63; border-radius: 8px;
+      position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+    }
+    .radar-circle { position: absolute; border-radius: 50%; border: 1px dashed rgba(0, 210, 255, 0.35); }
+    .radar-circle.c1 { width: 45px; height: 45px; border-color: rgba(0, 255, 136, 0.7); background: rgba(0, 255, 136, 0.08); }
+    .radar-circle.c2 { width: 90px; height: 90px; border-color: rgba(255, 183, 0, 0.5); }
+    .radar-circle.c3 { width: 135px; height: 135px; border-color: rgba(255, 51, 68, 0.4); }
+    .radar-crosshair-h { position: absolute; width: 100%; height: 1px; background: rgba(0, 210, 255, 0.2); }
+    .radar-crosshair-v { position: absolute; height: 100%; width: 1px; background: rgba(0, 210, 255, 0.2); }
+    .radar-blip-target { position: absolute; width: 10px; height: 10px; border: 2px solid var(--accent-green); border-radius: 50%; transform: translate(-50%, -50%); animation: pulseTarget 1.8s infinite ease-out; }
+    @keyframes pulseTarget { 0% { transform: translate(-50%, -50%) scale(0.9); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; } }
+    .radar-blip-rig { position: absolute; width: 12px; height: 12px; background: var(--accent-cyan); border: 2px solid #fff; border-radius: 3px; transform: translate(-50%, -50%); box-shadow: 0 0 10px var(--accent-cyan); }
+
+    .telemetry-row { display: flex; justify-content: space-between; font-size: 0.82rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+    .telemetry-val { font-weight: 700; color: #fff; }
+
+    .controls-panel {
+      width: 320px; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 12px;
+      padding: 16px; backdrop-filter: blur(10px); box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      display: flex; flex-direction: column; gap: 14px; pointer-events: auto;
+    }
+    .panel-header { font-size: 1rem; font-weight: 700; color: var(--accent-cyan); display: flex; align-items: center; justify-content: space-between; }
+    .phase-step { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(18, 30, 49, 0.7); border: 1px solid rgba(255,255,255,0.06); font-size: 0.85rem; transition: all 0.3s ease; }
+    .phase-step.active { background: rgba(0, 210, 255, 0.15); border-color: var(--accent-cyan); font-weight: 600; }
+    .phase-step.completed { background: rgba(0, 255, 136, 0.12); border-color: var(--accent-green); color: var(--accent-green); }
+    .step-number { width: 22px; height: 22px; border-radius: 50%; background: #1f3653; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; }
+    .phase-step.completed .step-number { background: var(--accent-green); color: #000; }
+
+    .action-button {
+      background: linear-gradient(135deg, #0088cc, #005588); color: #fff; border: none; padding: 10px 14px;
+      border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s ease;
+      display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(0,136,204,0.3);
+      width: 100%;
+    }
+    .action-button:hover:not(:disabled) { background: linear-gradient(135deg, #00aaff, #0077bb); transform: translateY(-1px); }
+    .action-button:disabled { background: #1f2a3a; color: #64748b; cursor: not-allowed; box-shadow: none; }
+
+    .btn-secondary {
+      background: #18283e;
+      border: 1px solid #28446b;
+      color: #cbd5e1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover { background: #233a59; color: #fff; }
+
+    .dp-control-box { background: rgba(9, 17, 28, 0.7); border: 1px solid #1a324f; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .dp-header { font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+    .d-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 140px; margin: 0 auto; }
+    .dp-btn { background: #18283e; border: 1px solid #23436b; color: #cbd5e1; padding: 8px 0; border-radius: 6px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+    .dp-btn:hover { background: var(--accent-cyan); color: #000; }
+
+    .bottom-bar {
+      display: flex; justify-content: space-between; align-items: center; background: var(--panel-bg);
+      border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px 20px; backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5); pointer-events: auto;
+    }
+    .quick-toggles { display: flex; gap: 10px; align-items: center; }
+    .toggle-btn { background: #142338; border: 1px solid #1e3a5f; color: var(--text-main); padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; cursor: pointer; transition: all 0.2s ease; }
+    .toggle-btn.active { background: rgba(0, 210, 255, 0.2); border-color: var(--accent-cyan); color: #fff; }
+
+    /* Modals & Backdrop */
+    .modal-backdrop {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 10, 18, 0.92);
+      backdrop-filter: blur(10px); z-index: 100; display: flex; align-items: center; justify-content: center;
+      pointer-events: auto; flex-direction: column;
+    }
+    .modal-card {
+      width: 550px; max-width: 94%; background: #0d1a2d; border: 1px solid #204570; border-radius: 16px;
+      padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.85); display: flex; flex-direction: column; gap: 14px; text-align: center;
+      max-height: 94vh; overflow-y: auto; position: relative;
+    }
+    .modal-card h2 { color: var(--accent-cyan); font-size: 1.35rem; }
+    .modal-card.game-over h2 { color: var(--accent-danger); }
+    .modal-card.victory h2 { color: var(--accent-green); }
+    .scenario-selector { display: flex; flex-direction: column; gap: 10px; margin: 10px 0; }
+    .scenario-btn {
+      background: #13243a; border: 1px solid #204570; color: #fff; padding: 12px; border-radius: 10px;
+      cursor: pointer; text-align: right; transition: all 0.2s ease; display: flex; justify-content: space-between; align-items: center;
+    }
+    .scenario-btn:hover { background: rgba(0, 210, 255, 0.15); border-color: var(--accent-cyan); transform: translateX(-4px); }
+
+    .tilt-indicator { display: flex; align-items: center; gap: 10px; }
+    .tilt-bubble-box { width: 80px; height: 16px; background: #09121e; border: 1px solid #1a324f; border-radius: 8px; position: relative; overflow: hidden; }
+    .tilt-bubble { position: absolute; top: 2px; left: 50%; width: 12px; height: 10px; background: var(--accent-cyan); border-radius: 5px; transform: translateX(-50%); transition: left 0.1s linear; }
+
+   
+    .update-check-btn {
+      background: linear-gradient(135deg, rgba(0, 210, 255, 0.18), rgba(0, 136, 204, 0.3));
+      border: 1px solid var(--accent-cyan);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 700;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 16px rgba(0, 210, 255, 0.25);
+      transition: all 0.25s ease;
+    }
+    .update-check-btn:hover {
+      background: linear-gradient(135deg, rgba(0, 210, 255, 0.35), rgba(0, 136, 204, 0.5));
+      box-shadow: 0 0 24px rgba(0, 210, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    /* Wizard Onboarding Styles */
+    .wizard-progress {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      position: relative;
+    }
+    .wizard-step-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      z-index: 2;
+    }
+    .wizard-step-circle {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #162a45;
+      border: 2px solid #284c7a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #94a3b8;
+      transition: all 0.3s;
+    }
+    .wizard-step-node.active .wizard-step-circle {
+      border-color: var(--accent-cyan);
+      background: var(--accent-cyan);
+      color: #050a12;
+      box-shadow: 0 0 10px var(--accent-cyan);
+    }
+    .wizard-step-node.completed .wizard-step-circle {
+      border-color: var(--accent-green);
+      background: var(--accent-green);
+      color: #050a12;
+    }
+    .wizard-step-title {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .wizard-step-node.active .wizard-step-title {
+      color: var(--accent-cyan);
+      font-weight: bold;
+    }
+    .wizard-progress-bar {
+      position: absolute;
+      top: 13px;
+      left: 15%;
+      right: 15%;
+      height: 2px;
+      background: #1b3353;
+      z-index: 1;
+    }
+    .wizard-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-cyan);
+      transition: width 0.3s ease;
+    }
+
+    .reg-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: right;
+    }
+    .reg-input-group label {
+      font-size: 0.76rem;
+      color: #cbd5e1;
+    }
+    .reg-input-group input, .reg-input-group select, .reg-input-group textarea {
+      background: #13243a;
+      border: 1px solid #204570;
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.84rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .reg-input-group input:focus, .reg-input-group select:focus, .reg-input-group textarea:focus {
+      border-color: var(--accent-cyan);
+    }
+    .reg-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .wizard-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    /* Cards Style */
+    .info-card {
+      width: 550px;
+      text-align: center;
+      gap: 14px;
+    }
+    .hero-icon {
+      font-size: 2.8rem;
+      margin-bottom: -6px;
+      animation: floatRig 3s infinite ease-in-out;
+    }
+    @keyframes floatRig {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+    .card-text-box {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+      text-align: justify;
+      background: rgba(16, 28, 45, 0.65);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 210, 255, 0.18);
+    }
+
+    /* Level Briefing Specs Grid */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 8px 0;
+      text-align: right;
+    }
+    .spec-item {
+      background: rgba(19, 36, 58, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+    .spec-title {
+      color: var(--accent-cyan);
+      font-weight: bold;
+      font-size: 0.75rem;
+      margin-bottom: 2px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* أزرار التفعيل السرية للمدير */
+    #adminSecretTrigger {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 80px;
+      height: 80px;
+      z-index: 999999;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .card-admin-hotspot {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      width: 55px;
+      height: 55px;
+      z-index: 50;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    /* لوحة تحكم المدير */
+    .admin-card {
+      width: 920px;
+      max-width: 96%;
+      max-height: 90vh;
+      overflow-y: auto;
+      text-align: right;
+    }
+    .admin-table-box {
+      overflow-x: auto;
+      margin: 10px 0;
+      border: 1px solid #1e3a5f;
+      border-radius: 8px;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      color: #e2e8f0;
+    }
+    .admin-table th, .admin-table td {
+      padding: 8px 10px;
+      border: 1px solid #1a324f;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .admin-table th {
+      background: #142338;
+      color: var(--accent-cyan);
+      font-weight: bold;
+    }
+    .admin-table tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .admin-tab-btn {
+      background: #162a45;
+      border: 1px solid #284c7a;
+      color: #94a3b8;
+      padding: 7px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+    .admin-tab-btn.active {
+      background: var(--accent-cyan);
+      color: #050a12;
+      font-weight: bold;
+      border-color: var(--accent-cyan);
+    }
+  </style>
+  <script src="three.min.js"></script>
+</head>
+<body>
+  <div id="webgl-container"></div>
+
+  <!-- 1. منطقة النقر السرية في أقصى يمين الشاشة العلوية -->
+  <div id="adminSecretTrigger" onclick="handleAdminSecretTrigger()" ondblclick="openAdminLogin()" title=""></div>
+
+  <div class="ui-overlay">
+    <div class="top-bar interactive">
+      <div class="game-title">
+        <span>⚓ محاكي هندسة المنصات البحرية</span>
+        <div id="scenarioBadge" class="scenario-badge">المستوى 1: المياه الضحلة (GBS)</div>
+      </div>
+      <div class="resource-meters">
+        <div class="meter-item">
+          <div class="meter-label"><span>الميزانية ($)</span><span id="txtBudget">$5,000,000</span></div>
+          <div class="meter-bar-container"><div id="barBudget" class="meter-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="meter-item">
+          <div class="meter-label"><span>الوقود (DP)</span><span id="txtFuel">100%</span></div>
+          <div class="meter-bar-container"><div id="barFuel" class="meter-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="meter-item">
+          <div class="meter-label"><span>سلامة الهيكل</span><span id="txtIntegrity">100%</span></div>
+          <div class="meter-bar-container"><div id="barIntegrity" class="meter-fill" style="width: 100%;"></div></div>
+        </div>
+        <div class="meter-item">
+          <div class="meter-label"><span>نافذة الطقس</span><span id="txtTime">180s</span></div>
+          <div class="meter-bar-container"><div id="barTime" class="meter-fill" style="width: 100%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="middle-area">
+      <div class="telemetry-panel">
+        <div class="panel-header">
+          <span>📡 رادار التموضع (DP Radar)</span>
+          <span id="dpStatusText" style="font-size: 0.75rem; color: var(--accent-green);">في المنطقة الآمنة</span>
+        </div>
+        <div class="radar-box">
+          <div class="radar-circle c3"></div><div class="radar-circle c2"></div><div class="radar-circle c1"></div>
+          <div class="radar-crosshair-h"></div><div class="radar-crosshair-v"></div>
+          <div class="radar-blip-target" style="left: 50%; top: 50%;"></div>
+          <div id="radarRigBlip" class="radar-blip-rig" style="left: 50%; top: 50%;"></div>
+        </div>
+        <div class="telemetry-row"><span>انحراف الموقع (Drift)</span><span id="valDrift" class="telemetry-val">0.0 m</span></div>
+        <div class="telemetry-row">
+          <span>زاوية الميلان (Tilt)</span>
+          <div class="tilt-indicator">
+            <div class="tilt-bubble-box"><div id="tiltBubble" class="tilt-bubble"></div></div>
+            <span id="valTilt" class="telemetry-val">0.0°</span>
+          </div>
+        </div>
+        <div class="telemetry-row"><span>سرعة واتجاه الرياح</span><span id="valWind" class="telemetry-val">8 kts (NE)</span></div>
+        <div class="telemetry-row"><span>ارتفاع الأمواج (Swell)</span><span id="valWaves" class="telemetry-val">0.8 m</span></div>
+        <div class="dp-control-box">
+          <div class="dp-header"><span>دوافع التموضع (DP Thrusters)</span><span style="font-size:0.75rem; color:var(--accent-cyan)">WASD أو الأسهم</span></div>
+          <div class="d-pad">
+            <div></div><button class="dp-btn" onmousedown="applyThrust(0, -1)" onmouseup="stopThrust()">▲ شمال</button><div></div>
+            <button class="dp-btn" onmousedown="applyThrust(-1, 0)" onmouseup="stopThrust()">◀ غرب</button>
+            <button class="dp-btn" onclick="toggleAutoDP()">DP آلي</button>
+            <button class="dp-btn" onmousedown="applyThrust(1, 0)" onmouseup="stopThrust()">شرق ▶</button>
+            <div></div><button class="dp-btn" onmousedown="applyThrust(0, 1)" onmouseup="stopThrust()">▼ جنوب</button><div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-panel">
+        <div class="panel-header"><span>🏗️ مراحل التشييد الهندسي</span><span id="phasePercent" style="color: var(--accent-cyan); font-size: 0.85rem;">0%</span></div>
+        <div id="step1" class="phase-step active">
+          <div class="step-number">1</div>
+          <div><div style="font-weight: 600;">محاذاة موقع الحفر</div><div style="font-size: 0.75rem; color: var(--text-muted);">تثبيت المنصة في دائرة الأمان &lt; 6م</div></div>
+        </div>
+        <div id="step2" class="phase-step">
+          <div class="step-number">2</div>
+          <div><div style="font-weight: 600;">إنزال القاعدة البحرية (Subsea Base)</div><div style="font-size: 0.75rem; color: var(--text-muted);">تشغيل ونش الإنزال حتى قاع البحر</div></div>
+        </div>
+        <div id="step3" class="phase-step">
+          <div class="step-number">3</div>
+          <div><div style="font-weight: 600;">تركيب السطح والبرج (Topsides)</div><div style="font-size: 0.75rem; color: var(--text-muted);">تجميع برج الحفر ومعدات المعالجة</div></div>
+        </div>
+        <div id="step4" class="phase-step">
+          <div class="step-number">4</div>
+          <div><div style="font-weight: 600;">شد الكابلات وتمديد الأنابيب</div><div style="font-size: 0.75rem; color: var(--text-muted);">معايرة كابلات التثبيت وبدء التدفق</div></div>
+        </div>
+        <button id="btnMainAction" class="action-button" onclick="executeCurrentPhase()"><span>بدء إنزال القاعدة البحرية</span></button>
+        <div id="phaseInstruction" style="font-size: 0.8rem; color: #a0aec0; line-height: 1.4; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
+          💡 استخدم دوافع الـ DP للحفاظ على تمركز المنصة فوق الهدف أثناء تنفيذ مهام الرفع والإنزال.
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="quick-toggles">
+        <button id="btnView" class="toggle-btn" onclick="toggleCameraView()">🎥 زاوية الكاميرا: منظور علوي</button>
+        <button id="btnNight" class="toggle-btn" onclick="toggleLightingMode()">💡 الإضاءة: نهارية</button>
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">استخدم الفأرة لتدوير الكاميرا ثلاثية الأبعاد | عجلة الفأرة للتقريب والتبعيد</div>
+    </div>
+  </div>
+
+  <!-- 1. الشاشة الترحيبية الأولى -->
+  <div id="welcomeModal" class="modal-backdrop hidden">
+    <div class="modal-card info-card">
+      <div class="hero-icon">⚓</div>
+      <h2>أهلاً بك في محاكي تركيب المنصات البحرية</h2>
+      <div class="card-text-box">
+        مرحباً بك في المنصة التفاعلية المتقدمة لمحاكاة هندسة وتشغيل منشآت الحفر والإنتاج في أعالي البحار.
+        <br><br>
+        تم تطوير هذه البيئة الافتراضية لتمكين المهندسين والطلاب من معايشة التحديات الهندسية الميدانية في البحر المفتوح؛ بدءاً من إدارة أنظمة التموضع الديناميكي (Dynamic Positioning) لمقاومة انجراف التيارات والأمواج، وصولاً إلى محاذاة وإنزال القواعد البحرية وتثبيت السطوح ومعدات الحفر طبقاً للأصول الهندسية المعتمدة.
+        <br><br>
+        سجّل بياناتك الأكاديمية والمهنية لتنضم إلى سجل مشغلي المنصات البحرية وتبدأ مهمتك.
+      </div>
+      <button type="button" class="action-button" onclick="proceedToRegistration()" style="padding: 13px; font-size: 1rem;">
+        <span>الدخول وتسجيل البيانات ◀</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. واجهة تسجيل بياناتك (3 خطوات متتالية) -->
+  <div id="userRegModal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <h2>تسجيل بياناتك</h2>
+      
+      <div class="wizard-progress">
+        <div class="wizard-progress-bar">
+          <div id="wizardFill" class="wizard-progress-fill"></div>
+        </div>
+        <div id="stepNode1" class="wizard-step-node active">
+          <div class="wizard-step-circle">1</div>
+          <span class="wizard-step-title">الشخصية والإقامة</span>
+        </div>
+        <div id="stepNode2" class="wizard-step-node">
+          <div class="wizard-step-circle">2</div>
+          <span class="wizard-step-title">المسار الأكاديمي</span>
+        </div>
+        <div id="stepNode3" class="wizard-step-node">
+          <div class="wizard-step-circle">3</div>
+          <span class="wizard-step-title">التدريب والجاهزية</span>
+        </div>
+      </div>
+
+      <form id="wizardForm" onsubmit="handleWizardFinalSubmit(event)" style="display: flex; flex-direction: column; gap: 11px;">
+        
+        <!-- الواجهة 1: البيانات الشخصية والاتصال والإقامة والعمل -->
+        <div id="wizardTab1" class="wizard-tab">
+          <div class="reg-input-group" style="margin-bottom: 8px;">
+            <label for="uName">الاسم الكامل (الثلاثي) *</label>
+            <input type="text" id="uName" required placeholder="مثال: أحمد محمد علي">
+          </div>
+
+          <div class="reg-grid-2" style="margin-bottom: 8px;">
+            <div class="reg-input-group">
+              <label for="uPhone">رقم الهاتف / الواتساب *</label>
+              <input type="tel" id="uPhone" required placeholder="09xxxxxxxx">
+            </div>
+            <div class="reg-input-group">
+              <label for="uBirthYear">سنة الميلاد (المواليد) *</label>
+              <input type="number" id="uBirthYear" required min="1950" max="2016" placeholder="مثال: 2001">
+            </div>
+          </div>
+
+          <div class="reg-grid-2" style="margin-bottom: 8px;">
+            <div class="reg-input-group">
+              <label for="uGov">المحافظة *</label>
+              <select id="uGov" required>
+                <option value="" disabled selected>اختر المحافظة</option>
+                <option value="دمشق">دمشق</option>
+                <option value="ريف دمشق">ريف دمشق</option>
+                <option value="حمص">حمص</option>
+                <option value="حلب">حلب</option>
+                <option value="حماة">حماة</option>
+                <option value="اللاذقية">اللاذقية</option>
+                <option value="طرطوس">طرطوس</option>
+                <option value="إدلب">إدلب</option>
+                <option value="درعا">درعا</option>
+                <option value="السويداء">السويداء</option>
+                <option value="القنيطرة">القنيطرة</option>
+                <option value="دير الزور">دير الزور</option>
+                <option value="الرقة">الرقة</option>
+                <option value="الحسكة">الحسكة</option>
+                <option value="خارج سوريا">خارج سوريا</option>
+              </select>
+            </div>
+            <div class="reg-input-group">
+              <label for="uArea">المنطقة / الحي السكني *</label>
+              <input type="text" id="uArea" required placeholder="مثال: الإنشاءات / المزة">
+            </div>
+          </div>
+
+          <div class="reg-input-group">
+            <label for="uWorkStatus">هل تعمل حالياً بغير اختصاصك؟ *</label>
+            <select id="uWorkStatus" required>
+              <option value="أعمل ضمن اختصاصي">أعمل ضمن اختصاصي</option>
+              <option value="أعمل بغير اختصاصي">أعمل بغير اختصاصي</option>
+              <option value="طالب متفرغ للدراسة" selected>طالب متفرغ للدراسة</option>
+              <option value="باحث عن فرصة عمل">باحث عن فرصة عمل</option>
+            </select>
+          </div>
+
+          <div class="wizard-actions">
+            <div style="flex: 1;"></div>
+            <button type="button" class="action-button" onclick="goToWizardStep(2)" style="width: 140px;">
+              <span>التالي ▶</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- الواجهة 2: المسار الأكاديمي والجامعي -->
+        <div id="wizardTab2" class="wizard-tab hidden">
+          <div class="reg-grid-2" style="margin-bottom: 8px;">
+            <div class="reg-input-group">
+              <label for="uUniversity">الجامعة *</label>
+              <select id="uUniversity" required>
+                <option value="" disabled selected>اختر الجامعة</option>
+                <option value="جامعة دمشق">جامعة دمشق</option>
+                <option value="جامعة حمص">جامعة حمص</option>
+                <option value="جامعة حلب">جامعة حلب</option>
+                <option value="جامعة تشرين">جامعة تشرين</option>
+                <option value="جامعة حماة">جامعة حماة</option>
+                <option value="جامعة الفرات">جامعة الفرات</option>
+                <option value="جامعة طرطوس">جامعة طرطوس</option>
+                <option value="جامعة خاصة / افتراضية">جامعة خاصة / افتراضية</option>
+                <option value="أخرى / خارج القطر">أخرى / خارج القطر</option>
+              </select>
+            </div>
+            <div class="reg-input-group">
+              <label for="uMajor">الكلية / التخصص *</label>
+              <select id="uMajor" required>
+                <option value="" disabled selected>اختر التخصص</option>
+                <option value="هندسة مدنية">هندسة مدنية</option>
+                <option value="هندسة بترول">هندسة بترول</option>
+                <option value="هندسة بترولية">هندسة بترولية</option>
+                <option value="هندسة ميكانيكية">هندسة ميكانيكية</option>
+                <option value="هندسة كهربائية وحواسيب">هندسة كهربائية وحواسيب</option>
+                <option value="هندسة عمارة">هندسة عمارة</option>
+                <option value="هندسة كيميائية / بيئية">هندسة كيميائية / بيئية</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="reg-grid-2">
+            <div class="reg-input-group">
+              <label for="uAcademicLevel">المستوى الدراسي الحالي *</label>
+              <select id="uAcademicLevel" required>
+                <option value="" disabled selected>اختر المستوى</option>
+                <option value="طالب - سنة أولى / ثانية">طالب - سنة أولى / ثانية</option>
+                <option value="طالب - سنة ثالثة / رابعة">طالب - سنة ثالثة / رابعة</option>
+                <option value="طالب - سنة خامسة (تخرج)">طالب - سنة خامسة (تخرج)</option>
+                <option value="مهندس خريج">مهندس خريج</option>
+                <option value="دراسات عليا (ماجستير / دكتوراه)">دراسات عليا (ماجستير / دكتوراه)</option>
+              </select>
+            </div>
+            <div class="reg-input-group">
+              <label for="uGradYear">سنة التخرج (اختياري للطلاب المستمرين)</label>
+              <input type="number" id="uGradYear" min="1975" max="2035" placeholder="مثال: 2024">
+            </div>
+          </div>
+
+          <div class="wizard-actions">
+            <button type="button" class="btn-secondary" onclick="goToWizardStep(1)" style="width: 120px;">
+              <span>◀ السابق</span>
+            </button>
+            <button type="button" class="action-button" onclick="goToWizardStep(3)" style="width: 140px;">
+              <span>التالي ▶</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- الواجهة 3: التدريب والخبرات والجاهزية المهنية -->
+        <div id="wizardTab3" class="wizard-tab hidden">
+          <div class="reg-grid-2" style="margin-bottom: 8px;">
+            <div class="reg-input-group">
+              <label for="uHasTrained">هل خضعت لتدريب هندسي من قبل؟ *</label>
+              <select id="uHasTrained" required onchange="toggleTrainingWhereBox()">
+                <option value="لا" selected>لا</option>
+                <option value="نعم">نعم</option>
+              </select>
+            </div>
+            <div class="reg-input-group" id="trainingWhereGroup" style="display: none;">
+              <label for="uTrainingWhere">أين كان التدريب؟ (الجهة / الشركة / الموقع) *</label>
+              <input type="text" id="uTrainingWhere" placeholder="مثال: مصفاة حمص، شركة نفط، مشروع سكني...">
+            </div>
+            <div class="reg-input-group" id="travelObstacleGroup">
+              <label for="uTravelObstacle">هل يوجد مانع للسفر لتدريب خارج محافظتك؟ *</label>
+              <select id="uTravelObstacle" required>
+                <option value="لا، لا يوجد مانع ويمكنني السفر" selected>لا، يمكنني السفر</option>
+                <option value="نعم، أفضل التدريب داخل محافظتي فقط">نعم، أفضل داخل محافظتي</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="reg-grid-2" style="margin-bottom: 8px;">
+            <div class="reg-input-group">
+              <label for="uSafetyPerception">هل ترى أن التدريبات الميدانية في بلدنا آمنة؟ *</label>
+              <select id="uSafetyPerception" required>
+                <option value="نعم، آمنة ومجهزة">نعم، آمنة ومجهزة</option>
+                <option value="إلى حد ما" selected>إلى حد ما</option>
+                <option value="تحتاج لتشديد معايير السلامة المهنية">تحتاج لمعايير سلامة أعلى</option>
+              </select>
+            </div>
+            <div class="reg-input-group">
+              <label for="uSoftware">البرمجيات الهندسية المتقنة</label>
+              <input type="text" id="uSoftware" placeholder="AutoCAD, Revit, ETABS, Python...">
+            </div>
+          </div>
+
+          <div class="reg-input-group" style="margin-bottom: 8px;">
+            <label for="uFutureTraining">ما هي التدريبات التي ترى أنك تحتاجها مستقبلاً؟ *</label>
+            <input type="text" id="uFutureTraining" required placeholder="مثال: السلامة البحرية HSE، فحص التربة البحرية، محاكاة الحفر...">
+          </div>
+
+          <div class="reg-input-group" style="margin-bottom: 10px;">
+            <label for="uCerts">الدورات والشهادات المهنية الإضافية (إن وجدت)</label>
+            <input type="text" id="uCerts" placeholder="شهادات نقابة، إدارة مشاريع، إدارة مخاطر...">
+          </div>
+
+          <div class="wizard-actions">
+            <button type="button" class="btn-secondary" onclick="goToWizardStep(2)" style="width: 120px;">
+              <span>◀ السابق</span>
+            </button>
+            <button type="submit" id="btnFinalSubmit" class="action-button" style="flex: 1;">
+              <span>تأكيد وبدء اختيار المهمة ⚓</span>
+            </button>
+          </div>
+          <div id="regStatus" style="font-size: 0.8rem; color: var(--accent-cyan); display: none; margin-top: 4px;">جاري حفظ السجل والبدء...</div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. نافذة اختيار المستوى (مع زر التحديث مكان الخط الأصفر + الزر السري) -->
+  <div id="gameModal" class="modal-backdrop hidden">
+    
+
+    <div id="modalCard" class="modal-card">
+      <!-- منطقة النقر السرية في أعلى يمين بطاقة المستويات -->
+      <div class="card-admin-hotspot" onclick="handleAdminSecretTrigger()" ondblclick="openAdminLogin()" title=""></div>
+
+      <h2 id="modalTitle" onclick="handleAdminSecretTrigger()" ondblclick="openAdminLogin()" style="cursor: pointer;">اختيار مشروع الحفر البحري</h2>
+      <p id="modalDesc" style="color: var(--text-muted); font-size: 0.9rem;">اختر بيئة العمل لمعاينة التعليمات الهندسية ومواصفات المشروع:</p>
+      
+      <div id="scenarioList" class="scenario-selector">
+        <div class="scenario-btn" onclick="openLevelBriefing(1)">
+          <div>
+            <div style="font-weight: 700; color: var(--accent-green);">المستوى 1: المياه الضحلة (الخليج العربي)</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 40م | طقس هادئ | منصة خرسانية GBS</div>
+          </div>
+          <span style="color: var(--accent-cyan); font-weight: bold;">تعليمات وبدء ▶</span>
+        </div>
+        <div class="scenario-btn" onclick="openLevelBriefing(2)">
+          <div>
+            <div style="font-weight: 700; color: var(--accent-warn);">المستوى 2: بحر الشمال العاصف</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 250م | أمواج ورياح قوية | منصة TLP بالأرجل المشدودة</div>
+          </div>
+          <span style="color: var(--accent-warn); font-weight: bold;">تعليمات وبدء ▶</span>
+        </div>
+        <div class="scenario-btn" onclick="openLevelBriefing(3)">
+          <div>
+            <div style="font-weight: 700; color: var(--accent-danger);">المستوى 3: المياه فائقة العمق (المحيط الأطلسي)</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 800م | عاصفة ليلية وصواعق | سفينة حفر / شبه غاطسة</div>
+          </div>
+          <span style="color: var(--accent-danger); font-weight: bold;">تعليمات وبدء ▶</span>
+        </div>
+      </div>
+      <button id="modalActionBtn" class="action-button hidden" onclick="restartOrNext()">إعادة المحاولة</button>
+    </div>
+  </div>
+
+  <!-- 4. نافذة التعليمات الفنية والتمهيد الهندسي لكل مستوى (Level Briefing) -->
+  <div id="levelBriefingModal" class="modal-backdrop hidden">
+    <div class="modal-card info-card">
+      <div id="briefingIcon" class="hero-icon">🌊</div>
+      <h2 id="briefingTitle">تعليمات ومواصفات المشروع</h2>
+      <div id="briefingBadge" class="scenario-badge" style="display: inline-block; align-self: center; margin-top: -6px;">المستوى 1</div>
+      
+      <div class="specs-grid">
+        <div class="spec-item">
+          <div class="spec-title">عمق المياه</div>
+          <div id="specDepth" style="color: #fff;">40 متر</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-title">نوع المنصة البحرية</div>
+          <div id="specPlatform" style="color: #fff;">منصة جاذبية خرسانية (GBS)</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-title">حالة الطقس والرياح</div>
+          <div id="specWeather" style="color: #fff;">بحر هادئ (رياح 8 عقد / أمواج 0.6م)</div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-title">نطاق الأمان المسموح للـ DP</div>
+          <div id="specDPTolerance" style="color: var(--accent-green);">انحراف أقل من 6.0 متر</div>
+        </div>
+      </div>
+
+      <div id="briefingDesc" class="card-text-box"></div>
+
+      <div class="wizard-actions">
+        <button type="button" class="btn-secondary" onclick="backToScenarioList()" style="width: 130px;">
+          <span>◀ تغيير المستوى</span>
+        </button>
+        <button type="button" class="action-button" onclick="launchBriefedLevel()" style="flex: 1; padding: 12px; font-size: 0.95rem;">
+          <span>انطلاق وبدء المهمة ⚓</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. نافذة الاقتراحات والملاحظات بعد إنهاء المستوى الأول -->
+  <div id="feedbackModal" class="modal-backdrop hidden">
+    <div class="modal-card info-card">
+      <div class="hero-icon" style="color: var(--accent-green);">🏆</div>
+      <h2 style="color: var(--accent-green);">تهانينا! تم إنجاز المستوى الأول بنجاح</h2>
+      
+      <div class="card-text-box" style="text-align: center;">
+        بصفتك مهندساً ومشاركاً في تجربة المستوى الأول، رأيك القيّم يساعدنا في تطوير المحاكي وإضافة ميزات أكثر واقعية. ما هي اقتراحاتك أو ملاحظاتك الهندسية لتحسين محاكي تركيب المنصات البحرية؟
+      </div>
+
+      <div class="reg-input-group" style="margin-top: 4px;">
+        <textarea id="uFeedbackText" rows="4" placeholder="اكتب اقتراحاتك، ميزات برمجية ترغب بوجودها، أو ملاحظاتك حول فيزياء المحاكاة هنا..."></textarea>
+      </div>
+
+      <div class="wizard-actions">
+        <button type="button" class="btn-secondary" onclick="skipFeedbackAndProceed()" style="width: 140px;">
+          <span>تخطي للمستوى 2 ◀</span>
+        </button>
+        <button type="button" id="btnSendFeedback" class="action-button" onclick="submitFeedbackAndProceed()" style="flex: 1;">
+          <span>إرسال الاقتراح والانتقال للمستوى الثاني ▶</span>
+        </button>
+      </div>
+      <div id="feedbackStatus" style="font-size: 0.8rem; color: var(--accent-cyan); display: none; margin-top: 4px;">جاري إرسال اقتراحك...</div>
+    </div>
+  </div>
+
+  <!-- 6. نافذة إدخال كلمة سر المدير -->
+  <div id="adminPassModal" class="modal-backdrop hidden" style="z-index: 100000;">
+    <div class="modal-card" style="width: 380px;">
+      <h2>🔒 دخول المدير المصرح</h2>
+      <p style="font-size: 0.82rem; color: var(--text-muted);">يرجى إدخال رمز الأمان للوصول إلى السجلات:</p>
+      <input type="password" id="adminPassInput" placeholder="أدخل كلمة المرور..." 
+             onkeydown="if(event.key==='Enter') verifyAdminPassword()"
+             style="background: #13243a; border: 1px solid #204570; color: #fff; padding: 10px; border-radius: 8px; text-align: center; font-size: 1rem; outline: none;">
+      <div id="adminPassError" style="color: var(--accent-danger); font-size: 0.8rem; display: none;">كلمة المرور غير صحيحة!</div>
+      <div style="display: flex; gap: 10px; margin-top: 6px;">
+        <button type="button" class="btn-secondary" onclick="closeAdminModals()" style="flex: 1;">إلغاء</button>
+        <button type="button" class="action-button" onclick="verifyAdminPassword()" style="flex: 1;">دخول</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. لوحة تحكم المدير (عرض البيانات والاقتراحات والتصدير) -->
+  <div id="adminPanelModal" class="modal-backdrop hidden" style="z-index: 100000;">
+    <div class="modal-card admin-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e3a5f; padding-bottom: 10px;">
+        <h2 style="font-size: 1.25rem;">📊 سجل بيانات المستخدمين والاقتراحات (خاص بالمدير)</h2>
+        <button type="button" class="btn-secondary" onclick="closeAdminModals()" style="padding: 4px 12px;">✕ إغلاق</button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; flex-wrap: wrap; gap: 8px;">
+        <div class="admin-tabs">
+          <button type="button" id="tabBtnUsers" class="admin-tab-btn active" onclick="switchAdminTab('users')">قائمة المستخدمين المسجلين (<span id="countUsers">0</span>)</button>
+          <button type="button" id="tabBtnFeedback" class="admin-tab-btn" onclick="switchAdminTab('feedback')">اقتراحات المستوى الأول (<span id="countFeedbacks">0</span>)</button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-secondary" onclick="copyAdminDataToClipboard()" style="padding: 6px 12px; font-size: 0.8rem;">
+            📋 نسخ للحافظة
+          </button>
+          <button type="button" class="action-button" onclick="exportAdminDataToExcel()" style="width: auto; padding: 6px 14px; font-size: 0.8rem;">
+            📥 تصدير السجل كملف Excel (CSV)
+          </button>
+        </div>
+      </div>
+
+      <div id="adminUsersView" class="admin-table-box">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>التاريخ</th>
+              <th>الاسم الكامل</th>
+              <th>رقم الهاتف</th>
+              <th>المواليد</th>
+              <th>المحافظة</th>
+              <th>المنطقة</th>
+              <th>العمل بالاختصاص</th>
+              <th>الجامعة</th>
+              <th>التخصص</th>
+              <th>المستوى الدراسي</th>
+              <th>سنة التخرج</th>
+              <th>تدريب سابق؟</th>
+              <th>مكان التدريب</th>
+              <th>مانع السفر</th>
+              <th>أمان التدريب</th>
+              <th>التدريبات المطلوبة</th>
+              <th>الشهادات</th>
+              <th>البرمجيات</th>
+            </tr>
+          </thead>
+          <tbody id="adminUsersTbody">
+            <tr><td colspan="19" style="padding: 20px;">لا توجد بيانات مسجلة حتى الآن على هذا الجهاز.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="adminFeedbackView" class="admin-table-box hidden">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>التاريخ</th>
+              <th>الاسم</th>
+              <th>رقم الهاتف</th>
+              <th>المحافظة</th>
+              <th>المستوى</th>
+              <th>نص الاقتراح / الملاحظات</th>
+            </tr>
+          </thead>
+          <tbody id="adminFeedbackTbody">
+            <tr><td colspan="7" style="padding: 20px;">لا توجد اقتراحات مسجلة بعد.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       إعدادات الإصدار والتحديثات
+       ========================================================================= */
+    const CURRENT_APP_VERSION = "1.0.0";
+    // رابط فحص التحديثات (يمكنكم وضع رابط ملف version.json على Netlify أو Google Drive لاحقاً)
+    const UPDATE_CHECK_URL = ""; 
+    const UPDATE_DOWNLOAD_PAGE = "https://your-game-update-link.com"; // رابط تحميل النسخة الأحدث
+
+    function checkForAppUpdates() {
+      // إذا لم يكن هناك سيرفر تحديث بعد، أو التطبيق في نسخته الأولى:
+      if (!UPDATE_CHECK_URL) {
+        alert("✅ أنت الآن لديك أحدث نسخة من محاكي تركيب المنصات البحرية (الإصدار: " + CURRENT_APP_VERSION + ").\n\nعند توفر أي تحديثات ومراحل جديدة مستقبلاً ستتمكن من تنزيلها بضغطة زر من هنا.");
+        return;
+      }
+
+      // في حال توفر رابط السيرفر السحابي
+      fetch(UPDATE_CHECK_URL)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.latestVersion && data.latestVersion !== CURRENT_APP_VERSION) {
+            const confirmUpdate = confirm("🚀 يتوفر تحديث جديد للمحاكي!\n\nالإصدار الجديد: " + data.latestVersion + "\nما الجديد: " + (data.notes || "مراحل وتحسينات هندسية جديدة") + "\n\nهل ترغب بالانتقال لتحميل النسخة الأحدث الآن؟");
+            if (confirmUpdate) {
+              window.open(data.downloadUrl || UPDATE_DOWNLOAD_PAGE, '_blank');
+            }
+          } else {
+            alert("✅ أنت الآن لديك أحدث نسخة من محاكي تركيب المنصات البحرية (الإصدار: " + CURRENT_APP_VERSION + ").");
+          }
+        })
+        .catch(err => {
+          alert("✅ أنت الآن لديك أحدث نسخة من محاكي تركيب المنصات البحرية (الإصدار: " + CURRENT_APP_VERSION + ").");
+        });
+    }
+
+    /* =========================================================================
+       إدارة النوافذ ومعالج التسجيل
+       ========================================================================= */
+    let currentWizardStep = 1;
+    let pendingLevelId = 1;
+
+    function checkUserRegistration() {
+      const isRegistered = localStorage.getItem('offshore_user_registered');
+      const welcomeModal = document.getElementById('welcomeModal');
+      const regModal = document.getElementById('userRegModal');
+      const gameModal = document.getElementById('gameModal');
+
+      if (isRegistered === 'true') {
+        if (welcomeModal) welcomeModal.style.display = 'none';
+        if (regModal) regModal.style.display = 'none';
+        if (gameModal) {
+          gameModal.style.display = 'flex';
+          gameModal.classList.remove('hidden');
+        }
+      } else {
+        if (welcomeModal) {
+          welcomeModal.style.display = 'flex';
+          welcomeModal.classList.remove('hidden');
+        }
+        if (regModal) regModal.style.display = 'none';
+        if (gameModal) gameModal.style.display = 'none';
+      }
+    }
+
+    function proceedToRegistration() {
+      document.getElementById('welcomeModal').style.display = 'none';
+      document.getElementById('welcomeModal').classList.add('hidden');
+
+      const regModal = document.getElementById('userRegModal');
+      regModal.style.display = 'flex';
+      regModal.classList.remove('hidden');
+      goToWizardStep(1);
+    }
+
+    function toggleTrainingWhereBox() {
+      const hasTrained = document.getElementById('uHasTrained').value;
+      const whereBox = document.getElementById('trainingWhereGroup');
+      const inputWhere = document.getElementById('uTrainingWhere');
+      if (hasTrained === 'نعم') {
+        whereBox.style.display = 'flex';
+        inputWhere.required = true;
+      } else {
+        whereBox.style.display = 'none';
+        inputWhere.required = false;
+        inputWhere.value = '';
+      }
+    }
+
+    function goToWizardStep(step) {
+      if (step > currentWizardStep) {
+        if (currentWizardStep === 1) {
+          const name = document.getElementById('uName').value.trim();
+          const phone = document.getElementById('uPhone').value.trim();
+          const bYear = document.getElementById('uBirthYear').value.trim();
+          const gov = document.getElementById('uGov').value;
+          const area = document.getElementById('uArea').value.trim();
+          if (!name || !phone || !bYear || !gov || !area) {
+            alert('يرجى تعبئة جميع الحقول المطلوبة في الخطوة الأولى.');
+            return;
+          }
+        } else if (currentWizardStep === 2) {
+          const uni = document.getElementById('uUniversity').value;
+          const major = document.getElementById('uMajor').value;
+          const level = document.getElementById('uAcademicLevel').value;
+          if (!uni || !major || !level) {
+            alert('يرجى تعبئة الجامعة والتخصص والمستوى الدراسي.');
+            return;
+          }
+        }
+      }
+
+      currentWizardStep = step;
+
+      for (let i = 1; i <= 3; i++) {
+        const tab = document.getElementById('wizardTab' + i);
+        const node = document.getElementById('stepNode' + i);
+        if (i === step) {
+          tab.classList.remove('hidden');
+          node.classList.add('active');
+          node.classList.remove('completed');
+        } else if (i < step) {
+          tab.classList.add('hidden');
+          node.classList.remove('active');
+          node.classList.add('completed');
+        } else {
+          tab.classList.add('hidden');
+          node.classList.remove('active');
+          node.classList.remove('completed');
+        }
+      }
+
+      const fill = document.getElementById('wizardFill');
+      if (step === 1) fill.style.width = '0%';
+      else if (step === 2) fill.style.width = '50%';
+      else if (step === 3) fill.style.width = '100%';
+    }
+
+    async function handleWizardFinalSubmit(e) {
+      e.preventDefault();
+      
+      const futureTraining = document.getElementById('uFutureTraining').value.trim();
+      if (!futureTraining) {
+        alert('يرجى كتابة التدريبات التي ترى أنك بحاجة لها مستقبلاً.');
+        return;
+      }
+
+      const hasTrained = document.getElementById('uHasTrained').value;
+      const trainingWhere = document.getElementById('uTrainingWhere').value.trim();
+      if (hasTrained === 'نعم' && !trainingWhere) {
+        alert('يرجى تحديد الجهة أو الموقع الذي خضعت فيه للتدريب.');
+        return;
+      }
+
+      const btn = document.getElementById('btnFinalSubmit');
+      const statusText = document.getElementById('regStatus');
+      btn.disabled = true;
+      statusText.style.display = 'block';
+
+      const fullProfile = {
+        name: document.getElementById('uName').value.trim(),
+        phone: document.getElementById('uPhone').value.trim(),
+        birthYear: document.getElementById('uBirthYear').value.trim(),
+        governorate: document.getElementById('uGov').value,
+        area: document.getElementById('uArea').value.trim(),
+        workStatus: document.getElementById('uWorkStatus').value,
+        university: document.getElementById('uUniversity').value,
+        major: document.getElementById('uMajor').value,
+        academicLevel: document.getElementById('uAcademicLevel').value,
+        gradYear: document.getElementById('uGradYear').value.trim() || 'قيد الدراسة',
+        hasTrained: hasTrained,
+        trainingLocation: trainingWhere || 'لا يوجد',
+        travelObstacle: document.getElementById('uTravelObstacle').value,
+        safetyPerception: document.getElementById('uSafetyPerception').value,
+        certifications: document.getElementById('uCerts').value.trim() || 'لا يوجد',
+        software: document.getElementById('uSoftware').value.trim() || 'لا يوجد',
+        futureTraining: futureTraining,
+        careerGoal: 'مشغل منصات بحرية ومحاكاة هندسية',
+        timestamp: new Date().toISOString()
+      };
+
+      // حفظ السجل في ذاكرة المدير محلياً
+      const allUsers = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
+      allUsers.push(fullProfile);
+      localStorage.setItem('offshore_admin_users_list', JSON.stringify(allUsers));
+
+      // حفظ حالة تسجيل المستخدم
+      localStorage.setItem('offshore_user_registered', 'true');
+      localStorage.setItem('offshore_user_profile', JSON.stringify(fullProfile));
+
+      document.getElementById('userRegModal').style.display = 'none';
+      document.getElementById('userRegModal').classList.add('hidden');
+
+      const gameModal = document.getElementById('gameModal');
+      gameModal.style.display = 'flex';
+      gameModal.classList.remove('hidden');
+    }
+
+    /* =========================================================================
+       لوحة تعليمات وشرح المستوى الفني
+       ========================================================================= */
+    const LEVEL_DATA = {
+      1: {
+        title: "مشروع تركيب منصة المياه الضحلة (الخليج العربي)",
+        badge: "المستوى 1: المياه الضحلة (GBS)",
+        icon: "🏖️",
+        depth: "40 متراً",
+        platform: "منصة جاذبية خرسانية ثقيلة (GBS)",
+        weather: "طقس نهار هادئ (رياح 8 عقد / أمواج 0.6م)",
+        tolerance: "انحراف أقل من 6.0 متر",
+        instructions: `
+          <b>🎯 الهدف الهندسي للمهمة:</b><br>
+          تثبيت قاعدة ثقيلة تعتمد على وزن الجاذبية (GBS) على قاع صخري/رملي مستوٍ، ثم رفع السطح العلوي وبرج الحفر وتوصيل خطوط التدفق.<br><br>
+          <b>🛠️ ما ستراه وتفعله بالترتيب:</b><br>
+          1. <b>تمركز الـ DP:</b> حافظ على موقع المنصة في الرادار داخل دائرة الأمان الخضراء (&lt; 6م) باستخدام أزرار (WASD أو الأسهم).<br>
+          2. <b>إنزال ونش القاعدة:</b> اضغط الزر الأزرق لتشغيل رافعة الإنزال ببطء نحو القعر.<br>
+          3. <b>تجميع السطح (Topsides):</b> بعد استقرار القاعدة، اضغط لرفع وتثبيت برج الحفر وغرف الإعاشة ومهبط الطائرات.<br>
+          4. <b>شد الكابلات والأنابيب:</b> المرحلة الأخيرة لمعايرة الأنابيب وتدفق الإنتاج بنجاح.<br><br>
+          💡 <i>نصيحة أمان: لا تستعجل إنزال الونش قبل التأكد من ثبات المنصة وتوسطها فوق الهدف.</i>
+        `
+      },
+      2: {
+        title: "مشروع تركيب منصة بحر الشمال العاصف",
+        badge: "المستوى 2: المياه العميقة (TLP)",
+        icon: "🌊",
+        depth: "250 متراً",
+        platform: "منصة الأوتار المشدودة (Tension-Leg Platform - TLP)",
+        weather: "أمطار وأمواج متلاطمة (رياح 20 عقدة / أمواج 1.6م)",
+        tolerance: "انحراف أقل من 7.5 متر",
+        instructions: `
+          <b>🎯 الهدف الهندسي للمهمة:</b><br>
+          في هذا العمق المتقدم، لا يمكن استخدام القواعد الخرسانية الثابتة، بل يتم تثبيت أوتار شد فولاذية رأسية (Tethers) ترتبط بمراسي القاع وتمنع الحركة الرأسية مع السماح بحركة أفقية محدودة.<br><br>
+          <b>🛠️ ما ستراه وتفعله بالترتيب:</b><br>
+          1. <b>مقاومة الرياح الشديدة:</b> ستلاحظ انزلاقاً أسرع للمنصة؛ يمكنك استخدام <b>(DP آلي)</b> لمساعدتك في تثبيت الموقع.<br>
+          2. <b>إنزال قوالب الإرساء:</b> إنزال رؤوس الآبار إلى عمق 250 متراً تحت أمواج سطحية نشطة.<br>
+          3. <b>تثبيت السطح ومراقبة الميلان:</b> راقب مؤشر الزاوية الزئبقي (Tilt) جيداً لتفادي تجاوز الحد الحرج.<br>
+          4. <b>معايرة شد الأوتار:</b> إحكام توازن الشد بين الأوتار الأربعة لإتمام التثبيت.<br><br>
+          💡 <i>نصيحة أمان: استهلك وقود الدوافع بحكمة لتفادي نفاده أثناء مقاومة العاصفة.</i>
+        `
+      },
+      3: {
+        title: "مشروع الحفر في المياه فائقة العمق (المحيط الأطلسي)",
+        badge: "المستوى 3: المياه فائقة العمق (Atlantic Storm)",
+        icon: "⚡",
+        depth: "800 متر",
+        platform: "منصة شبه غاطسة / سفينة حفر متطورة (Semi-Submersible)",
+        weather: "عاصفة ليلية وصواعق رعدية (رياح 32 عقدة / أمواج 2.6م)",
+        tolerance: "انحراف أقل من 9.0 متر",
+        instructions: `
+          <b>🎯 الهدف الهندسي للمهمة:</b><br>
+          مهمة الخبراء في أقصى الظروف البحرية؛ حيث يتم الاعتماد المطلق على نظام الدوافع النفاثة خماسية الاتجاهات وتطبيقات السلامة البحرية العليا.<br><br>
+          <b>🛠️ ما ستراه وتفعله بالترتيب:</b><br>
+          1. <b>التحكم الليلي:</b> استخدم كاشفات الإضاءة الليلية (Floodlights) للمعاينة وسط الأمطار والصواعق.<br>
+          2. <b>موازنة زوايا الميلان الخطيرة:</b> اضبط توازن المنصة وتفادَ تجاوز زاوية الميلان 28 درجة لحماية أنابيب الحفر من الكسر.<br>
+          3. <b>إنزال منظومة مانع الانفجار (BOP):</b> إنزال أثقل معدات السيطرة على الآبار لقعر المحيط.<br>
+          4. <b>إتمام الوصلات البحرية وإنقاذ المهمة قبل نفاد نافذة الطقس المتاحة.</b><br><br>
+          💡 <i>نصيحة أمان: التدخل اليدوي السريع بمحركات الدفع مع الـ DP الآلي يضمن نجاتك.</i>
+        `
+      }
+    };
+
+    function openLevelBriefing(levelId) {
+      pendingLevelId = levelId;
+      const data = LEVEL_DATA[levelId];
+
+      document.getElementById('briefingTitle').textContent = data.title;
+      document.getElementById('briefingBadge').textContent = data.badge;
+      document.getElementById('briefingIcon').textContent = data.icon;
+      document.getElementById('specDepth').textContent = data.depth;
+      document.getElementById('specPlatform').textContent = data.platform;
+      document.getElementById('specWeather').textContent = data.weather;
+      document.getElementById('specDPTolerance').textContent = data.tolerance;
+      document.getElementById('briefingDesc').innerHTML = data.instructions;
+
+      document.getElementById('gameModal').style.display = 'none';
+      document.getElementById('gameModal').classList.add('hidden');
+
+      const modal = document.getElementById('levelBriefingModal');
+      modal.style.display = 'flex';
+      modal.classList.remove('hidden');
+    }
+
+    function backToScenarioList() {
+      document.getElementById('levelBriefingModal').style.display = 'none';
+      document.getElementById('levelBriefingModal').classList.add('hidden');
+
+      const gameModal = document.getElementById('gameModal');
+      gameModal.style.display = 'flex';
+      gameModal.classList.remove('hidden');
+    }
+
+    function launchBriefedLevel() {
+      document.getElementById('levelBriefingModal').style.display = 'none';
+      document.getElementById('levelBriefingModal').classList.add('hidden');
+      startScenario(pendingLevelId);
+    }
+
+    /* =========================================================================
+       اقتراحات نهاية المستوى الأول
+       ========================================================================= */
+    function showLevel1FeedbackModal() {
+      const modal = document.getElementById('feedbackModal');
+      modal.style.display = 'flex';
+      modal.classList.remove('hidden');
+    }
+
+    async function submitFeedbackAndProceed() {
+      const feedbackText = document.getElementById('uFeedbackText').value.trim();
+      const statusText = document.getElementById('feedbackStatus');
+      const btn = document.getElementById('btnSendFeedback');
+
+      if (!feedbackText) {
+        alert('يرجى كتابة اقتراحك أو ملاحظاتك، أو يمكنك الضغط على "تخطي للمستوى 2".');
+        return;
+      }
+
+      btn.disabled = true;
+      statusText.style.display = 'block';
+
+      let profile = {};
+      try {
+        profile = JSON.parse(localStorage.getItem('offshore_user_profile') || '{}');
+      } catch(e){}
+
+      const payload = {
+        name: profile.name || 'مشارك',
+        phone: profile.phone || '',
+        governorate: profile.governorate || '',
+        scenario: 1,
+        feedback: feedbackText,
+        timestamp: new Date().toISOString()
+      };
+    
+      const allFeedbacks = JSON.parse(localStorage.getItem('offshore_admin_feedbacks_list') || '[]');
+      allFeedbacks.push(payload);
+      localStorage.setItem('offshore_admin_feedbacks_list', JSON.stringify(allFeedbacks));
+
+      document.getElementById('feedbackModal').style.display = 'none';
+      document.getElementById('feedbackModal').classList.add('hidden');
+      
+      openLevelBriefing(2);
+    }
+
+    function skipFeedbackAndProceed() {
+      document.getElementById('feedbackModal').style.display = 'none';
+      document.getElementById('feedbackModal').classList.add('hidden');
+      openLevelBriefing(2);
+    }
+
+    /* =========================================================================
+       نظام لوحة المدير وسجل البيانات وتصدير Excel المضمون
+       ========================================================================= */
+    const ADMIN_SECRET_KEY = "RigAdmin#2026@Sy";
+    let adminClickCount = 0;
+    let adminClickTimer = null;
+
+    function handleAdminSecretTrigger() {
+      adminClickCount++;
+      clearTimeout(adminClickTimer);
+      if (adminClickCount >= 2) {
+        adminClickCount = 0;
+        openAdminLogin();
+      } else {
+        adminClickTimer = setTimeout(() => { adminClickCount = 0; }, 600);
+      }
+    }
+
+    function openAdminLogin() {
+      const passInput = document.getElementById('adminPassInput');
+      passInput.value = '';
+      document.getElementById('adminPassError').style.display = 'none';
+      
+      const modal = document.getElementById('adminPassModal');
+      modal.style.display = 'flex';
+      modal.classList.remove('hidden');
+      setTimeout(() => passInput.focus(), 80);
+    }
+
+    function closeAdminModals() {
+      document.getElementById('adminPassModal').style.display = 'none';
+      document.getElementById('adminPassModal').classList.add('hidden');
+      document.getElementById('adminPanelModal').style.display = 'none';
+      document.getElementById('adminPanelModal').classList.add('hidden');
+    }
+
+    function verifyAdminPassword() {
+      const entered = document.getElementById('adminPassInput').value.trim();
+      if (entered === ADMIN_SECRET_KEY) {
+        document.getElementById('adminPassModal').style.display = 'none';
+        document.getElementById('adminPassModal').classList.add('hidden');
+        renderAdminDashboard();
+        document.getElementById('adminPanelModal').style.display = 'flex';
+        document.getElementById('adminPanelModal').classList.remove('hidden');
+      } else {
+        document.getElementById('adminPassError').style.display = 'block';
+      }
+    }
+
+    function switchAdminTab(tab) {
+      if (tab === 'users') {
+        document.getElementById('adminUsersView').classList.remove('hidden');
+        document.getElementById('adminFeedbackView').classList.add('hidden');
+        document.getElementById('tabBtnUsers').classList.add('active');
+        document.getElementById('tabBtnFeedback').classList.remove('active');
+      } else {
+        document.getElementById('adminUsersView').classList.add('hidden');
+        document.getElementById('adminFeedbackView').classList.remove('hidden');
+        document.getElementById('tabBtnUsers').classList.remove('active');
+        document.getElementById('tabBtnFeedback').classList.add('active');
+      }
+    }
+
+    function renderAdminDashboard() {
+      const users = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
+      const feedbacks = JSON.parse(localStorage.getItem('offshore_admin_feedbacks_list') || '[]');
+
+      document.getElementById('countUsers').textContent = users.length;
+      document.getElementById('countFeedbacks').textContent = feedbacks.length;
+
+      const uTbody = document.getElementById('adminUsersTbody');
+      if (users.length === 0) {
+        uTbody.innerHTML = '<tr><td colspan="19" style="padding: 20px;">لا توجد بيانات مسجلة حتى الآن على هذا الجهاز.</td></tr>';
+      } else {
+        uTbody.innerHTML = users.map((u, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${new Date(u.timestamp).toLocaleDateString('ar-SY')}</td>
+            <td style="font-weight:bold; color:var(--accent-cyan);">${u.name}</td>
+            <td>${u.phone}</td>
+            <td>${u.birthYear}</td>
+            <td>${u.governorate}</td>
+            <td>${u.area}</td>
+            <td>${u.workStatus}</td>
+            <td>${u.university}</td>
+            <td>${u.major}</td>
+            <td>${u.academicLevel}</td>
+            <td>${u.gradYear}</td>
+            <td>${u.hasTrained}</td>
+            <td>${u.trainingLocation}</td>
+            <td>${u.travelObstacle}</td>
+            <td>${u.safetyPerception}</td>
+            <td>${u.futureTraining}</td>
+            <td>${u.certifications}</td>
+            <td>${u.software}</td>
+          </tr>
+        `).join('');
+      }
+
+      const fTbody = document.getElementById('adminFeedbackTbody');
+      if (feedbacks.length === 0) {
+        fTbody.innerHTML = '<tr><td colspan="7" style="padding: 20px;">لا توجد اقتراحات مسجلة بعد.</td></tr>';
+      } else {
+        fTbody.innerHTML = feedbacks.map((f, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${new Date(f.timestamp).toLocaleDateString('ar-SY')}</td>
+            <td style="font-weight:bold; color:var(--accent-green);">${f.name}</td>
+            <td>${f.phone}</td>
+            <td>${f.governorate}</td>
+            <td>المستوى ${f.scenario || 1}</td>
+            <td style="text-align:right; max-width:300px; white-space:normal;">${f.feedback}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function generateCSVContent() {
+      const users = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
+      if (users.length === 0) return null;
+
+      let csv = "\uFEFF";
+      csv += "الرقم,التاريخ,الاسم,الهاتف,المواليد,المحافظة,المنطقة,العمل بالاختصاص,الجامعة,التخصص,المستوى,سنة التخرج,تدريب سابق,مكان التدريب,مانع السفر,أمان التدريب,التدريبات المطلوبة,الشهادات,البرمجيات\n";
+
+      users.forEach((u, i) => {
+        csv += `"${i+1}","${new Date(u.timestamp).toLocaleString('ar-SY')}","${u.name}","${u.phone}","${u.birthYear}","${u.governorate}","${u.area}","${u.workStatus}","${u.university}","${u.major}","${u.academicLevel}","${u.gradYear}","${u.hasTrained}","${u.trainingLocation}","${u.travelObstacle}","${u.safetyPerception}","${u.futureTraining}","${u.certifications}","${u.software}"\n`;
+      });
+      return csv;
+    }
+
+    function exportAdminDataToExcel() {
+  const users = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
+  
+  // 1. إذا كان السجل فارغاً
+  if (users.length === 0) {
+    const singleUser = JSON.parse(localStorage.getItem('offshore_user_profile') || 'null');
+    if (singleUser) {
+      users.push(singleUser);
+      localStorage.setItem('offshore_admin_users_list', JSON.stringify(users));
+    } else {
+      showAdminNotice('⚠️ لا توجد أي بيانات مسجلة في السجل حتى الآن. قم بتسجيل مستخدم جديد لتظهر بياناته هنا.');
+      return;
+    }
+  }
+
+  // 2. تجهيز نص الإكسل
+  let csv = "\uFEFF"; // لدعم اللغة العربية في Excel
+  csv += "الرقم,التاريخ,الاسم,الهاتف,المواليد,المحافظة,المنطقة,العمل بالاختصاص,الجامعة,التخصص,المستوى,سنة التخرج,تدريب سابق,مكان التدريب,مانع السفر,أمان التدريب,التدريبات المطلوبة,الشهادات,البرمجيات\n";
+
+  users.forEach((u, i) => {
+    csv += `"${i+1}","${new Date(u.timestamp).toLocaleDateString('ar-SY')}","${u.name}","${u.phone}","${u.birthYear}","${u.governorate}","${u.area}","${u.workStatus}","${u.university}","${u.major}","${u.academicLevel}","${u.gradYear}","${u.hasTrained}","${u.trainingLocation}","${u.travelObstacle}","${u.safetyPerception}","${u.futureTraining}","${u.certifications}","${u.software}"\n`;
+  });
+
+  // 3. نسخ فوري إلى الحافظة (فقط إذا كانت البيئة تدعم ذلك)
+  if (navigator && navigator.clipboard) {
+    navigator.clipboard.writeText(csv).then(() => {
+      showAdminNotice('✅ تم نسخ السجل وحفظ الملف! (اضغط Ctrl+V في إكسل إذا لم يفتح تلقائياً)');
+    }).catch(() => {
+      showAdminNotice('📋 جاري تنزيل الملف...');
+    });
+  } else {
+    showAdminNotice('📋 جاري تنزيل الملف...');
+  }
+
+  // 4. تنزيل الملف بشكل آمن
+  try {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `سجل_المهندسين_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { 
+      document.body.removeChild(a); 
+      URL.revokeObjectURL(url); 
+    }, 500);
+  } catch(e) {
+    console.error("حدث خطأ أثناء تنزيل الملف:", e);
+  }
+}
+
+    // دالة إظهار رسائل التنبيه داخل لوحة المدير مباشرة بدون alert المحجوبة
+    function showAdminNotice(msg) {
+      let box = document.getElementById('adminNoticeBox');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'adminNoticeBox';
+        box.style.cssText = "background: #162a45; border: 1px solid #00d2ff; color: #fff; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin: 10px 0; text-align: center;";
+        const card = document.querySelector('.admin-card');
+        if (card) card.insertBefore(box, card.children);
+      }
+      box.style.display = 'block';
+      box.textContent = msg;
+    }
+
+    function copyAdminDataToClipboard() {
+      const csv = generateCSVContent();
+      if (!csv) {
+        alert('لا توجد بيانات مسجلة لنسخها.');
+        return;
+      }
+      navigator.clipboard.writeText(csv).then(() => {
+        alert('📋 تم نسخ كامل سجل البيانات بنجاح!\n\nيمكنك الآن فتح برنامج Excel والضغط على (Ctrl + V) لتنزيل الجدول مباشرة.');
+      }).catch(err => {
+        alert('يرجى تحديد البيانات ونسخها يدوياً.');
+      });
+    }
+
+    /* =========================================================================
+       فيزياء ومحاكاة اللعبة الهندسية
+       ========================================================================= */
+    const GAME_CONFIG = {
+      budgetRatePerSec: 1200, autoDPFuelRate: 0.12, manualThrustForce: 1.2, friction: 0.96, maxSafeDrift: 18.0, criticalTilt: 28.0
+    };
+
+    let gameState = {
+      isStarted: false,
+      scenario: 1, phase: 1, budget: 5000000, fuel: 100, integrity: 100, timeLeft: 180,
+      rigPos: { x: 0, z: 0 }, rigVel: { x: 0, z: 0 }, thrust: { x: 0, z: 0 }, autoDP: false,
+      windVector: { x: 0.04, z: 0.03, speedKnots: 8 }, waveHeight: 0.8, tilt: 0, cameraViewIndex: 0,
+      isNight: false, gameOver: false, isPaused: false, craneLowerProgress: 0, deckInstallProgress: 0, pipesProgress: 0
+    };
+
+    function initAudio() {}
+    function playBeep() {}
+    function playClank() {}
+    function toggleAudio() {}
+
+    let scene, camera, renderer, oceanMesh, oceanGeometry, seabedMesh;
+    let rigGroup, baseTemplateGroup, craneGroup, deckGroup, derrickGroup, pipeLinesGroup;
+    let rainParticles, rainGeometry, dirLight, ambientLight, stormLightningLight;
+    let clock = new THREE.Clock();
+
+    function init3D() {
+      const container = document.getElementById('webgl-container');
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a192f);
+      scene.fog = new THREE.FogExp2(0x0a192f, 0.006);
+
+      camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.5, 2000);
+      camera.position.set(0, 45, 95); camera.lookAt(0, 5, 0);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      container.appendChild(renderer.domElement);
+
+      ambientLight = new THREE.AmbientLight(0x406085, 1.2); scene.add(ambientLight);
+      dirLight = new THREE.DirectionalLight(0xffffff, 1.5); dirLight.position.set(100, 150, 60); dirLight.castShadow = true; scene.add(dirLight);
+      stormLightningLight = new THREE.PointLight(0x88ccff, 0, 500); stormLightningLight.position.set(0, 100, 0); scene.add(stormLightningLight);
+
+      oceanGeometry = new THREE.PlaneGeometry(500, 500, 64, 64); oceanGeometry.rotateX(-Math.PI / 2);
+      oceanMesh = new THREE.Mesh(oceanGeometry, new THREE.MeshStandardMaterial({ color: 0x003355, roughness: 0.2, metalness: 0.8, flatShading: true, transparent: true, opacity: 0.88 }));
+      scene.add(oceanMesh);
+
+      const seabedGeo = new THREE.PlaneGeometry(600, 600, 16, 16); seabedGeo.rotateX(-Math.PI / 2);
+      seabedMesh = new THREE.Mesh(seabedGeo, new THREE.MeshStandardMaterial({ color: 0x1a242f, roughness: 0.9 }));
+      seabedMesh.position.y = -60; scene.add(seabedMesh);
+
+      const targetGeo = new THREE.RingGeometry(1, 14, 32); targetGeo.rotateX(-Math.PI / 2);
+      const targetMesh = new THREE.Mesh(targetGeo, new THREE.MeshBasicMaterial({ color: 0x00ff88, wireframe: true, transparent: true, opacity: 0.6 }));
+      targetMesh.position.y = -59.5; scene.add(targetMesh);
+
+      buildRigModel(); initRain(); setupCameraMouseControls();
+      window.addEventListener('resize', onWindowResize);
+    }
+
+    function buildRigModel() {
+      rigGroup = new THREE.Group(); scene.add(rigGroup);
+      const colGeo = new THREE.CylinderGeometry(2.5, 2.5, 30, 16);
+      const steelMat = new THREE.MeshStandardMaterial({ color: 0xf39c12, roughness: 0.4, metalness: 0.6 });
+      const underwaterMat = new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.5 });
+      const offsets = [[-15, -15], [15, -15], [-15, 15], [15, 15]];
+
+      offsets.forEach(([cx, cz]) => {
+        const col = new THREE.Mesh(colGeo, steelMat); col.position.set(cx, 3, cz); col.castShadow = true; rigGroup.add(col);
+        const pontoon = new THREE.Mesh(new THREE.BoxGeometry(7, 6, 7), underwaterMat); pontoon.position.set(cx, -12, cz); rigGroup.add(pontoon);
+      });
+
+      const braceMat = new THREE.MeshStandardMaterial({ color: 0x7f8c8d });
+      const brace1 = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 30), braceMat); brace1.rotation.z = Math.PI / 2; brace1.position.set(0, -6, -15); rigGroup.add(brace1);
+      const brace2 = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 30), braceMat); brace2.rotation.z = Math.PI / 2; brace2.position.set(0, -6, 15); rigGroup.add(brace2);
+
+      baseTemplateGroup = new THREE.Group();
+      baseTemplateGroup.add(new THREE.Mesh(new THREE.BoxGeometry(24, 4, 24), new THREE.MeshStandardMaterial({ color: 0x34495e })));
+      for (let bx = -6; bx <= 6; bx += 12) {
+        for (let bz = -6; bz <= 6; bz += 12) {
+          const guide = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.8, 6, 12), new THREE.MeshStandardMaterial({ color: 0x1abc9c }));
+          guide.position.set(bx, 4, bz); baseTemplateGroup.add(guide);
+        }
+      }
+      baseTemplateGroup.position.set(0, -5, 0); rigGroup.add(baseTemplateGroup);
+
+      craneGroup = new THREE.Group();
+      const craneTower = new THREE.Mesh(new THREE.BoxGeometry(3, 20, 3), new THREE.MeshStandardMaterial({ color: 0xe74c3c })); craneTower.position.set(16, 25, -14);
+      const craneBoom = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 28), new THREE.MeshStandardMaterial({ color: 0xe74c3c })); craneBoom.position.set(16, 33, -2); craneBoom.rotation.x = -Math.PI / 6;
+      craneGroup.add(craneTower); craneGroup.add(craneBoom); rigGroup.add(craneGroup);
+
+      deckGroup = new THREE.Group();
+      deckGroup.add(new THREE.Mesh(new THREE.BoxGeometry(38, 4, 38), new THREE.MeshStandardMaterial({ color: 0x95a5a6, roughness: 0.5 })));
+      const lq = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 14), new THREE.MeshStandardMaterial({ color: 0xecf0f1 })); lq.position.set(-11, 25, -9); deckGroup.add(lq);
+      const helipad = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 1, 16), new THREE.MeshStandardMaterial({ color: 0x2c3e50 })); helipad.position.set(-11, 31, -9); deckGroup.add(helipad);
+
+      derrickGroup = new THREE.Group();
+      const derrick = new THREE.Mesh(new THREE.ConeGeometry(5, 26, 4), new THREE.MeshStandardMaterial({ color: 0xd35400, wireframe: true }));
+      derrick.position.set(0, 31, 0); derrickGroup.add(derrick); deckGroup.add(derrickGroup);
+      deckGroup.position.y = 35; deckGroup.visible = false; rigGroup.add(deckGroup);
+
+      pipeLinesGroup = new THREE.Group();
+      for (let i = 0; i < 4; i++) {
+        const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 65, 8), new THREE.MeshStandardMaterial({ color: 0x00d2ff, metalness: 0.8 }));
+        pipe.position.set((i%2===0?1:-1)*18, -25, (i<2?1:-1)*18); pipe.rotation.z = (i%2===0?1:-1)*0.18; pipeLinesGroup.add(pipe);
+      }
+      pipeLinesGroup.visible = false; rigGroup.add(pipeLinesGroup);
+    }
+
+    function initRain() {
+      const rainCount = 1800; rainGeometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(rainCount * 3);
+      for (let i = 0; i < rainCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 300; positions[i + 1] = Math.random() * 150; positions[i + 2] = (Math.random() - 0.5) * 300;
+      }
+      rainGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      rainParticles = new THREE.Points(rainGeometry, new THREE.PointsMaterial({ color: 0x93c5fd, size: 0.7, transparent: true, opacity: 0.6 }));
+      rainParticles.visible = false; scene.add(rainParticles);
+    }
+
+    let keysPressed = {};
+    window.addEventListener('keydown', (e) => { keysPressed[e.key.toLowerCase()] = true; });
+    window.addEventListener('keyup', (e) => { keysPressed[e.key.toLowerCase()] = false; });
+
+    function applyThrust(dx, dz) {
+      if (!gameState.isStarted) return;
+      gameState.thrust.x = dx * GAME_CONFIG.manualThrustForce;
+      gameState.thrust.z = dz * GAME_CONFIG.manualThrustForce;
+    }
+    function stopThrust() { gameState.thrust.x = 0; gameState.thrust.z = 0; }
+
+    function toggleAutoDP() {
+      if (!gameState.isStarted) return;
+      if (gameState.fuel <= 0) { alert("نفد الوقود: لا يمكن تشغيل الـ DP الآلي!"); return; }
+      gameState.autoDP = !gameState.autoDP;
+    }
+
+    function updatePhysics(dt) {
+      if (!gameState.isStarted || gameState.gameOver || gameState.isPaused) return;
+
+      const clampedDt = Math.min(dt, 0.05);
+      gameState.budget -= GAME_CONFIG.budgetRatePerSec * clampedDt;
+      gameState.timeLeft -= clampedDt;
+
+      if (gameState.timeLeft <= 0) { triggerGameOver(false, "انتهت نافذة الطقس المتاحة قبل اكتمال التشييد!"); return; }
+      if (gameState.budget <= 0) { triggerGameOver(false, "تجاوز المشروع الميزانية المخصصة وتوقفت العمليات!"); return; }
+
+      const driftX = gameState.windVector.x * (gameState.waveHeight * 0.45);
+      const driftZ = gameState.windVector.z * (gameState.waveHeight * 0.45);
+      gameState.rigVel.x += driftX * clampedDt; gameState.rigVel.z += driftZ * clampedDt;
+
+      if (keysPressed['w'] || keysPressed['arrowup']) applyThrust(0, -1);
+      else if (keysPressed['s'] || keysPressed['arrowdown']) applyThrust(0, 1);
+      else if (keysPressed['a'] || keysPressed['arrowleft']) applyThrust(-1, 0);
+      else if (keysPressed['d'] || keysPressed['arrowright']) applyThrust(1, 0);
+
+      if (gameState.autoDP && gameState.fuel > 0) {
+        const targetThrustX = -gameState.rigPos.x * 0.25 - gameState.rigVel.x * 1.2;
+        const targetThrustZ = -gameState.rigPos.z * 0.25 - gameState.rigVel.z * 1.2;
+        gameState.rigVel.x += targetThrustX * clampedDt;
+        gameState.rigVel.z += targetThrustZ * clampedDt;
+        gameState.fuel = Math.max(0, gameState.fuel - GAME_CONFIG.autoDPFuelRate * clampedDt);
+        if (gameState.fuel === 0) gameState.autoDP = false;
+      } else if (gameState.thrust.x !== 0 || gameState.thrust.z !== 0) {
+        if (gameState.fuel > 0) {
+          gameState.rigVel.x += gameState.thrust.x * clampedDt; gameState.rigVel.z += gameState.thrust.z * clampedDt;
+          gameState.fuel = Math.max(0, gameState.fuel - 0.08 * clampedDt);
+        }
+      }
+
+      gameState.rigVel.x *= Math.pow(GAME_CONFIG.friction, clampedDt * 60);
+      gameState.rigVel.z *= Math.pow(GAME_CONFIG.friction, clampedDt * 60);
+      gameState.rigPos.x += gameState.rigVel.x * clampedDt;
+      gameState.rigPos.z += gameState.rigVel.z * clampedDt;
+
+      const totalDrift = Math.sqrt(gameState.rigPos.x ** 2 + gameState.rigPos.z ** 2);
+      const t = clock.getElapsedTime();
+      const waveRoll = Math.sin(t * 1.2) * (gameState.waveHeight * 1.4);
+      const wavePitch = Math.cos(t * 0.9) * (gameState.waveHeight * 1.0);
+      gameState.tilt = Math.abs(waveRoll) + Math.abs(Math.sqrt(gameState.rigVel.x**2 + gameState.rigVel.z**2) * 0.5);
+
+      if (totalDrift > GAME_CONFIG.maxSafeDrift) {
+        gameState.integrity = Math.max(0, gameState.integrity - (totalDrift - GAME_CONFIG.maxSafeDrift) * 0.4 * clampedDt);
+      }
+
+      if (gameState.tilt >= GAME_CONFIG.criticalTilt || gameState.integrity <= 0) {
+        triggerGameOver(false, "انهيار هيكلي! تجاوزت زاوية الميلان الحد الحرج مما تسبب في كسر الأنابيب."); return;
+      }
+
+      if (gameState.phase === 2 && gameState.craneLowerProgress < 1) {
+        gameState.craneLowerProgress += clampedDt * 0.05;
+        baseTemplateGroup.position.y = -5 - gameState.craneLowerProgress * 53;
+        if (gameState.craneLowerProgress >= 1) { gameState.craneLowerProgress = 1; advancePhase(3); }
+      } else if (gameState.phase === 3 && gameState.deckInstallProgress < 1) {
+        gameState.deckInstallProgress += clampedDt * 0.08; deckGroup.visible = true;
+        deckGroup.position.y = THREE.MathUtils.lerp(35, 14, gameState.deckInstallProgress);
+        if (gameState.deckInstallProgress >= 1) { deckGroup.position.y = 14; advancePhase(4); }
+      } else if (gameState.phase === 4 && gameState.pipesProgress < 1) {
+        gameState.pipesProgress += clampedDt * 0.09; pipeLinesGroup.visible = true;
+        if (gameState.pipesProgress >= 1) advancePhase(5);
+      }
+
+      if (rigGroup) {
+        rigGroup.position.x = gameState.rigPos.x; rigGroup.position.z = gameState.rigPos.z;
+        rigGroup.position.y = Math.sin(t * 1.2) * (gameState.waveHeight * 0.25);
+        rigGroup.rotation.z = THREE.MathUtils.degToRad(waveRoll * 0.25);
+        rigGroup.rotation.x = THREE.MathUtils.degToRad(wavePitch * 0.2);
+      }
+
+      animateOceanMesh();
+
+      if (rainParticles && rainParticles.visible) {
+        const pos = rainGeometry.attributes.position.array;
+        for (let i = 1; i < pos.length; i += 3) { pos[i] -= 2.0; if (pos[i] < -10) pos[i] = 140; }
+        rainGeometry.attributes.position.needsUpdate = true;
+      }
+
+      if (gameState.scenario === 3 && Math.random() < 0.015) {
+        stormLightningLight.intensity = 4; setTimeout(() => { stormLightningLight.intensity = 0; }, 80);
+      }
+
+      updateHUD(totalDrift);
+    }
+
+    function animateOceanMesh() {
+      if (!oceanGeometry) return;
+      const t = clock.getElapsedTime(); const pos = oceanGeometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const u = pos.getX(i); const v = pos.getZ(i);
+        pos.setY(i, Math.sin(u * 0.04 + t * 1.5) * Math.cos(v * 0.04 + t * 1.2) * gameState.waveHeight);
+      }
+      pos.needsUpdate = true;
+    }
+
+    function updateHUD(driftDist) {
+      if (!gameState.isStarted) return;
+      document.getElementById('txtBudget').textContent = "$" + Math.max(0, Math.floor(gameState.budget)).toLocaleString();
+      document.getElementById('barBudget').style.width = (gameState.budget / 5000000 * 100) + "%";
+      document.getElementById('txtFuel').textContent = Math.floor(gameState.fuel) + "%";
+      document.getElementById('barFuel').style.width = gameState.fuel + "%";
+      document.getElementById('txtIntegrity').textContent = Math.floor(gameState.integrity) + "%";
+      document.getElementById('barIntegrity').style.width = gameState.integrity + "%";
+      document.getElementById('txtTime').textContent = Math.max(0, Math.ceil(gameState.timeLeft)) + "s";
+      document.getElementById('barTime').style.width = (gameState.timeLeft / 180 * 100) + "%";
+
+      document.getElementById('valDrift').textContent = driftDist.toFixed(1) + " m";
+      document.getElementById('valTilt').textContent = gameState.tilt.toFixed(1) + "°";
+      document.getElementById('valWaves').textContent = gameState.waveHeight.toFixed(1) + " m";
+
+      const bubble = document.getElementById('tiltBubble');
+      bubble.style.left = Math.min(85, Math.max(15, 50 + (gameState.rigVel.x * 15))) + "%";
+
+      const blip = document.getElementById('radarRigBlip');
+      blip.style.left = Math.min(95, Math.max(5, 50 + (gameState.rigPos.x / 18) * 45)) + "%";
+      blip.style.top = Math.min(95, Math.max(5, 50 + (gameState.rigPos.z / 18) * 45)) + "%";
+
+      const dpStatus = document.getElementById('dpStatusText');
+      if (driftDist < 5) { dpStatus.textContent = "محاذاة ممتازة (Green)"; dpStatus.style.color = "var(--accent-green)"; }
+      else if (driftDist < GAME_CONFIG.maxSafeDrift) { dpStatus.textContent = "انحراف طفيف (Yellow)"; dpStatus.style.color = "var(--accent-warn)"; }
+      else { dpStatus.textContent = "خطر: تجاوز دائرة الأمان!"; dpStatus.style.color = "var(--accent-danger)"; }
+    }
+
+    function executeCurrentPhase() {
+      if (!gameState.isStarted) return;
+      const btn = document.getElementById('btnMainAction');
+      const drift = Math.sqrt(gameState.rigPos.x ** 2 + gameState.rigPos.z ** 2);
+      if (gameState.phase === 1) {
+        if (drift > 6.0) { alert("تنبيه أمان: حافظ على استقرار المنصة داخل دائرة الأمان (< 6م) قبل بدء الإنزال!"); return; }
+        btn.disabled = true; btn.innerHTML = `<span>⏳ جاري إنزال ونش القاعدة البحرية...</span>`; advancePhase(2);
+      }
+    }
+
+    function advancePhase(nextPhase) {
+      gameState.phase = nextPhase;
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById('step' + i);
+        el.classList.remove('active');
+        if (i < nextPhase) el.classList.add('completed');
+        else if (i === nextPhase) el.classList.add('active');
+      }
+      document.getElementById('phasePercent').textContent = Math.min(100, Math.round(((nextPhase - 1) / 4) * 100)) + "%";
+      const btn = document.getElementById('btnMainAction');
+      const instruction = document.getElementById('phaseInstruction');
+
+      if (nextPhase === 2) {
+        instruction.textContent = "⚙️ جاري تشغيل ونش الرافعة البحرية لإنزال القاعدة الخرسانية. حافظ على ثبات الـ DP لتفادي الانحراف.";
+      } else if (nextPhase === 3) {
+        btn.disabled = false; btn.innerHTML = `<span>رفع وتثبيت السطح العلوي (Topsides)</span>`;
+        instruction.textContent = "🏗️ استقرت القاعدة في قاع البحر! اضغط لرفع السطح الرئيسي وتثبيت برج الحفر.";
+      } else if (nextPhase === 4) {
+        btn.disabled = false; btn.innerHTML = `<span>معايرة كابلات الشد وربط الأنابيب</span>`;
+        instruction.textContent = "🔗 تم تثبيت السطح العلوي! المرحلة الأخيرة: شد أوتار التثبيت وبدء خط التدفق.";
+      } else if (nextPhase === 5) {
+        triggerVictory();
+      }
+    }
+
+    function startScenario(id) {
+      gameState.isStarted = true;
+      gameState.scenario = id;
+      gameState.phase = 1;
+      gameState.craneLowerProgress = 0;
+      gameState.deckInstallProgress = 0;
+      gameState.pipesProgress = 0;
+      gameState.budget = 5000000;
+      gameState.fuel = 100;
+      gameState.integrity = 100;
+      gameState.timeLeft = 180;
+      gameState.gameOver = false;
+      gameState.autoDP = false;
+      gameState.rigPos = { x: 0, z: 0 };
+      gameState.rigVel = { x: 0, z: 0 };
+      gameState.tilt = 0;
+
+      const modal = document.getElementById('gameModal');
+      modal.style.display = 'none';
+      modal.classList.add('hidden');
+
+      const badge = document.getElementById('scenarioBadge');
+
+      if (id === 1) {
+        badge.textContent = "المستوى 1: المياه الضحلة (GBS)";
+        gameState.waveHeight = 0.6; gameState.windVector = { x: 0.02, z: 0.015, speedKnots: 8 };
+        document.getElementById('valWind').textContent = "8 kts (NNE)";
+        scene.background = new THREE.Color(0x0a2240); scene.fog = new THREE.FogExp2(0x0a2240, 0.006);
+        rainParticles.visible = false; ambientLight.intensity = 1.3;
+      } else if (id === 2) {
+        badge.textContent = "المستوى 2: بحر الشمال (TLP)";
+        gameState.waveHeight = 1.6; gameState.windVector = { x: -0.05, z: 0.04, speedKnots: 20 };
+        document.getElementById('valWind').textContent = "20 kts (NW)";
+        scene.background = new THREE.Color(0x111c2a); scene.fog = new THREE.FogExp2(0x111c2a, 0.006);
+        rainParticles.visible = true; ambientLight.intensity = 0.9;
+      } else if (id === 3) {
+        badge.textContent = "المستوى 3: المياه فائقة العمق (Atlantic Storm)";
+        gameState.waveHeight = 2.6; gameState.windVector = { x: 0.08, z: -0.06, speedKnots: 32 };
+        document.getElementById('valWind').textContent = "32 kts (ESE)";
+        scene.background = new THREE.Color(0x050a12); scene.fog = new THREE.FogExp2(0x050a12, 0.006);
+        rainParticles.visible = true; ambientLight.intensity = 0.5;
+      }
+
+      baseTemplateGroup.position.set(0, -5, 0); deckGroup.position.y = 35;
+      deckGroup.visible = false; pipeLinesGroup.visible = false;
+
+      for (let i = 1; i <= 4; i++) document.getElementById('step' + i).className = "phase-step " + (i === 1 ? "active" : "");
+      document.getElementById('phasePercent').textContent = "0%";
+      const btn = document.getElementById('btnMainAction');
+      btn.disabled = false; btn.innerHTML = `<span>بدء إنزال القاعدة البحرية</span>`;
+    }
+
+    function triggerGameOver(success, msg) {
+      gameState.gameOver = true;
+      gameState.isStarted = false;
+      
+      const modal = document.getElementById('gameModal');
+      const card = document.getElementById('modalCard');
+      const actionBtn = document.getElementById('modalActionBtn');
+      modal.style.display = 'flex';
+      modal.classList.remove('hidden'); actionBtn.classList.remove('hidden');
+
+      if (success) {
+        card.className = "modal-card victory";
+        document.getElementById('modalTitle').textContent = "🎉 تم إنجاز التشييد والتثبيت بنجاح!";
+        document.getElementById('modalDesc').textContent = msg;
+        actionBtn.textContent = "الانتقال للمستوى التالي";
+        actionBtn.onclick = () => { if (gameState.scenario < 3) openLevelBriefing(gameState.scenario + 1); else openLevelBriefing(1); };
+      } else {
+        card.className = "modal-card game-over";
+        document.getElementById('modalTitle').textContent = "⚠️ فشلت المهمة!";
+        document.getElementById('modalDesc').textContent = msg;
+        actionBtn.textContent = "إعادة تشغيل المهمة";
+        actionBtn.onclick = () => openLevelBriefing(gameState.scenario);
+      }
+    }
+
+    function triggerVictory() {
+      gameState.gameOver = true;
+      gameState.isStarted = false;
+
+      if (gameState.scenario === 1) {
+        showLevel1FeedbackModal();
+      } else {
+        triggerGameOver(true, `تم تثبيت منصة الحفر وتشغيل الأنابيب بنجاح! الميزانية المتبقية: $${Math.floor(gameState.budget).toLocaleString()} | سلامة الهيكل: ${Math.floor(gameState.integrity)}%`);
+      }
+    }
+
+    function restartOrNext() { openLevelBriefing(gameState.scenario); }
+
+    function toggleCameraView() {
+      gameState.cameraViewIndex = (gameState.cameraViewIndex + 1) % 3;
+      const btn = document.getElementById('btnView');
+      if (gameState.cameraViewIndex === 0) { btn.textContent = "🎥 زاوية الكاميرا: منظور علوي (Aerial)"; camera.position.set(0, 45, 95); }
+      else if (gameState.cameraViewIndex === 1) { btn.textContent = "🎥 زاوية الكاميرا: منظور الرادار (Tactical)"; camera.position.set(0, 110, 0); }
+      else { btn.textContent = "🎥 زاوية الكاميرا: مستوى السطح (Deck)"; camera.position.set(0, 15, 60); }
+      camera.lookAt(0, 5, 0);
+    }
+
+    function toggleLightingMode() {
+      gameState.isNight = !gameState.isNight;
+      const btn = document.getElementById('btnNight');
+      if (gameState.isNight) {
+        btn.textContent = "💡 الإضاءة: ليلية (Floodlights)"; dirLight.color.setHex(0x335588); dirLight.intensity = 0.5;
+      } else {
+        btn.textContent = "💡 الإضاءة: نهارية"; dirLight.color.setHex(0xffffff); dirLight.intensity = 1.5;
+      }
+    }
+
+    function setupCameraMouseControls() {
+      let isDragging = false, prevMousePos = { x: 0, y: 0 };
+      window.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.interactive') || e.target.closest('.modal-card') || e.target.closest('#adminSecretTrigger') || e.target.closest('.card-admin-hotspot')) return;
+        isDragging = true; prevMousePos = { x: e.clientX, y: e.clientY };
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const deltaX = e.clientX - prevMousePos.x, deltaY = e.clientY - prevMousePos.y;
+        camera.position.x = camera.position.x * Math.cos(deltaX * 0.006) - camera.position.z * Math.sin(deltaX * 0.006);
+        camera.position.z = camera.position.x * Math.sin(deltaX * 0.006) + camera.position.z * Math.cos(deltaX * 0.006);
+        camera.position.y = Math.max(8, Math.min(140, camera.position.y + deltaY * 0.15));
+        camera.lookAt(0, 5, 0);
+        prevMousePos = { x: e.clientX, y: e.clientY };
+      });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+      window.addEventListener('wheel', (e) => { camera.position.multiplyScalar(1 + e.deltaY * 0.0015); });
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      updatePhysics(clock.getDelta());
+      renderer.render(scene, camera);
+    }
+
+    window.onload = () => {
+      init3D();
+      animate();
+      checkUserRegistration();
+    };
+  </script>
+</body>
+</html>
