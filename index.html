@@ -904,6 +904,7 @@
               <th>التدريبات المطلوبة</th>
               <th>الشهادات</th>
               <th>البرمجيات</th>
+              <th style="color: #ff3344;">إجراء</th> <!-- أضف هذا السطر هنا -->
             </tr>
           </thead>
           <tbody id="adminUsersTbody">
@@ -1366,6 +1367,34 @@
       }
     }
 
+// دالة حذف طالب من سيرفر Neon
+    async function deletePlayerRecord(id) {
+      if (!confirm("هل أنت متأكد من حذف هذا السجل التجريبي نهائياً؟")) return;
+      if (window.neonSql && id) {
+        try {
+          await window.neonSql`DELETE FROM players WHERE id = ${id}`;
+          console.log("تم حذف السجل من Neon");
+        } catch (err) {
+          console.error("فشل الحذف:", err);
+        }
+      }
+      renderAdminDashboard(); // إعادة تحميل الجدول فوراً
+    }
+
+    // دالة حذف اقتراح من سيرفر Neon
+    async function deleteFeedbackRecord(id) {
+      if (!confirm("هل أنت متأكد من حذف هذا الاقتراح؟")) return;
+      if (window.neonSql && id) {
+        try {
+          await window.neonSql`DELETE FROM feedbacks WHERE id = ${id}`;
+        } catch (err) {
+          console.error("فشل الحذف:", err);
+        }
+      }
+      renderAdminDashboard();
+    }
+
+
     async function renderAdminDashboard() {
       let users = [];
       let feedbacks = [];
@@ -1414,6 +1443,12 @@
             <td>${u.future_training || u.futureTraining}</td>
             <td>${u.certifications}</td>
             <td>${u.software}</td>
+            <td>
+              <button type="button" onclick="deletePlayerRecord(${u.id})" 
+                      style="background:#ff3344; border:none; color:#fff; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.75rem;">
+                🗑️ حذف
+              </button>
+            </td>
           </tr>
         `).join('');
       }
