@@ -871,14 +871,10 @@
           <button type="button" id="tabBtnUsers" class="admin-tab-btn active" onclick="switchAdminTab('users')">قائمة المستخدمين المسجلين (<span id="countUsers">0</span>)</button>
           <button type="button" id="tabBtnFeedback" class="admin-tab-btn" onclick="switchAdminTab('feedback')">اقتراحات المستوى الأول (<span id="countFeedbacks">0</span>)</button>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <button type="button" class="btn-secondary" onclick="copyAdminDataToClipboard()" style="padding: 6px 12px; font-size: 0.8rem;">
-            📋 نسخ للحافظة
-          </button>
-          <button type="button" class="action-button" onclick="exportAdminDataToExcel()" style="width: auto; padding: 6px 14px; font-size: 0.8rem;">
-            📥 تصدير السجل كملف Excel (CSV)
-          </button>
-        </div>
+         <button type="button" class="action-button" onclick="exportAdminDataToExcel()" 
+        style="width: auto; padding: 8px 18px; font-size: 0.85rem; background: linear-gradient(135deg, #107c41, #0b5a2f); border: 1px solid #00ff88;">
+       📥 تصدير السجل كملف Excel (CSV)
+        </button>
       </div>
 
       <div id="adminUsersView" class="admin-table-box">
@@ -1484,15 +1480,15 @@
       return csv;
     }
 
-function exportAdminDataToExcel() {
-      // 1. جلب الأسطر المعروضة حالياً في جدول المستخدمين
+    async function exportAdminDataToExcel() {
+      // 1. جمع البيانات من الجدول المعروض أمامك
       const rows = document.querySelectorAll('#adminUsersTbody tr');
       if (!rows || rows.length === 0 || rows[0].innerText.includes('لا توجد بيانات')) {
-        showAdminNotice('⚠️ لا توجد بيانات في الجدول حالياً لتصديرها.');
+        showAdminNotice('⚠️ لا توجد بيانات مسجلة في الجدول لتصديرها.');
         return;
       }
 
-      // 2. قراءة عناوين الأعمدة وتجاهل عمود "إجراء" و"حذف"
+      // 2. استخراج أسماء الأعمدة (مع استبعاد عمود الحذف)
       const thElements = Array.from(document.querySelectorAll('#adminUsersView table thead th'));
       const headers = [];
       thElements.forEach(th => {
@@ -1502,7 +1498,7 @@ function exportAdminDataToExcel() {
         }
       });
 
-      // 3. بناء محتوى الإكسل بترميز يدعم اللغة العربية UTF-8 BOM
+      // 3. بناء نص الإكسل العربي بترميز UTF-8 وفواصل سليمة
       let csv = "\uFEFF";
       csv += headers.map(h => `"${h}"`).join(',') + "\n";
 
@@ -1514,7 +1510,17 @@ function exportAdminDataToExcel() {
         }
       });
 
-      // 4. توليد ملف الإكسل وتنزيله تلقائياً
+      // 4. الحفظ الحقيقي المباشر:
+      // إذا كان البرنامج يعمل كـ EXE: بايثون يحفظه فوراً على سطح المكتب ويفتحه في Excel
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.save_to_excel) {
+        try {
+          await window.pywebview.api.save_to_excel(csv);
+          showAdminNotice('✅ تم حفظ ملف Excel على سطح المكتب (Desktop) وفُتح بنجاح!');
+          return;
+        } catch(err) {}
+      }
+
+      // إذا فُتحت اللعبة من متصفح عادي: يتم تنزيل الملف مباشرة في مجلد التحميلات
       try {
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -1523,21 +1529,13 @@ function exportAdminDataToExcel() {
         a.download = `سجل_المهندسين_${new Date().toISOString().slice(0, 10)}.csv`;
         document.body.appendChild(a);
         a.click();
-        
-        setTimeout(() => {
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }, 500);
-
-        showAdminNotice('✅ تم تصدير السجل وتحميل ملف Excel بنجاح!');
-      } catch (err) {
-        // في حال كان المتصفح يمنع التحميل التلقائي، يتم نسخه للحافظة فوراً
-        navigator.clipboard.writeText(csv).then(() => {
-          showAdminNotice('📋 تم نسخ البيانات بنجاح! افتح Excel واضغط Ctrl + V.');
-        });
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+        showAdminNotice('✅ تم تنزيل ملف الإكسل بنجاح!');
+      } catch(e) {
+        showAdminNotice('يرجى استخدام زر التصدير من داخل برنامج اللعبة.');
       }
     }
-    
+
     // دالة إظهار رسائل التنبيه داخل لوحة المدير مباشرة بدون alert المحجوبة
     function showAdminNotice(msg) {
       let box = document.getElementById('adminNoticeBox');
