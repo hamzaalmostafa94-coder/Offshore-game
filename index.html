@@ -1481,14 +1481,13 @@
     }
 
     async function exportAdminDataToExcel() {
-      // 1. جمع البيانات من الجدول المعروض أمامك
       const rows = document.querySelectorAll('#adminUsersTbody tr');
       if (!rows || rows.length === 0 || rows[0].innerText.includes('لا توجد بيانات')) {
         showAdminNotice('⚠️ لا توجد بيانات مسجلة في الجدول لتصديرها.');
         return;
       }
 
-      // 2. استخراج أسماء الأعمدة (مع استبعاد عمود الحذف)
+      // 1. استخراج عناوين الأعمدة
       const thElements = Array.from(document.querySelectorAll('#adminUsersView table thead th'));
       const headers = [];
       thElements.forEach(th => {
@@ -1498,44 +1497,68 @@
         }
       });
 
-      // 3. بناء نص الإكسل العربي بترميز UTF-8 وفواصل سليمة
-      let csv = "\uFEFF";
-      csv += headers.map(h => `"${h}"`).join(',') + "\n";
+      // 2. بناء كود جدول الإكسل المنسق بالكامل مع دعم العربية والاتجاه من اليمين لليسار
+      let excelHTML = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--[if gte mso 9]>
+<xml>
+ <x:ExcelWorkbook>
+  <x:ExcelWorksheets>
+   <x:ExcelWorksheet>
+    <x:Name>سجل المهندسين</x:Name>
+    <x:WorksheetOptions>
+     <x:DisplayRightToLeft/>
+    </x:WorksheetOptions>
+   </x:ExcelWorksheet>
+  </x:ExcelWorksheets>
+ </x:ExcelWorkbook>
+</xml>
+<![endif]-->
+<style>
+  th { background-color: #1e3a5f; color: #ffffff; font-weight: bold; border: 1px solid #999; padding: 8px; text-align: center; }
+  td { border: 1px solid #ccc; padding: 6px; text-align: center; font-family: Arial, sans-serif; }
+</style>
+</head>
+<body dir="rtl">
+<table border="1">
+<thead><tr>`;
+
+      headers.forEach(h => { excelHTML += `<th>${h}</th>`; });
+      excelHTML += `</tr></thead><tbody>`;
 
       rows.forEach(tr => {
         const cells = Array.from(tr.querySelectorAll('td')).slice(0, headers.length);
         if (cells.length > 0) {
-          const rowTxt = cells.map(td => `"${td.innerText.replace(/"/g, '""').trim()}"`).join(',');
-          csv += rowTxt + "\n";
+          excelHTML += `<tr>`;
+          cells.forEach(td => { excelHTML += `<td>${td.innerText.trim()}</td>`; });
+          excelHTML += `</tr>`;
         }
       });
 
-      // 4. الحفظ الحقيقي المباشر:
-      // إذا كان البرنامج يعمل كـ EXE: بايثون يحفظه فوراً على سطح المكتب ويفتحه في Excel
+      excelHTML += `</tbody></table></body></html>`;
+
+      // 3. إرسال المحتوى لبايثون لحفظه كملف .xls وفتحه فوراً
       if (window.pywebview && window.pywebview.api && window.pywebview.api.save_to_excel) {
         try {
-          await window.pywebview.api.save_to_excel(csv);
-          showAdminNotice('✅ تم حفظ ملف Excel على سطح المكتب (Desktop) وفُتح بنجاح!');
+          await window.pywebview.api.save_to_excel(excelHTML);
+          showAdminNotice('✅ تم تصدير وفتح ملف Excel منسقاً بالكامل على سطح المكتب!');
           return;
         } catch(err) {}
       }
 
-      // إذا فُتحت اللعبة من متصفح عادي: يتم تنزيل الملف مباشرة في مجلد التحميلات
-      try {
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `سجل_المهندسين_${new Date().toISOString().slice(0, 10)}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
-        showAdminNotice('✅ تم تنزيل ملف الإكسل بنجاح!');
-      } catch(e) {
-        showAdminNotice('يرجى استخدام زر التصدير من داخل برنامج اللعبة.');
-      }
+      // متصفح عادي
+      const blob = new Blob([excelHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `سجل_المهندسين.xls`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+      showAdminNotice('✅ تم تنزيل ملف Excel منسق بنجاح!');
     }
-
+    
     // دالة إظهار رسائل التنبيه داخل لوحة المدير مباشرة بدون alert المحجوبة
     function showAdminNotice(msg) {
       let box = document.getElementById('adminNoticeBox');
