@@ -402,6 +402,11 @@
     }
   </style>
   <script src="three.min.js"></script>
+  <script type="module">
+  import { neon } from "https://esm.sh/@neondatabase/serverless";
+  // رابط اتصال قاعدة بيانات Neon الخاص بك
+  window.neonSql = neon("postgresql://neondb_owner:npg_SqP8dmTyWaR3@ep-crimson-bar-ayjmuaev-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
+</script>
 </head>
 <body>
   <div id="webgl-container"></div>
@@ -1108,6 +1113,28 @@
         timestamp: new Date().toISOString()
       };
 
+      // إرسال البيانات فوراً إلى سيرفر Neon السحابي
+      if (window.neonSql) {
+        try {
+          await window.neonSql`
+            INSERT INTO players (
+              name, phone, birth_year, governorate, area, work_status, 
+              university, major, academic_level, grad_year, has_trained, 
+              training_location, travel_obstacle, safety_perception, future_training, 
+              certifications, software
+            ) VALUES (
+              ${fullProfile.name}, ${fullProfile.phone}, ${fullProfile.birthYear}, ${fullProfile.governorate}, ${fullProfile.area}, ${fullProfile.workStatus},
+              ${fullProfile.university}, ${fullProfile.major}, ${fullProfile.academicLevel}, ${fullProfile.gradYear}, ${fullProfile.hasTrained},
+              ${fullProfile.trainingLocation}, ${fullProfile.travelObstacle}, ${fullProfile.safetyPerception}, ${fullProfile.futureTraining},
+              ${fullProfile.certifications}, ${fullProfile.software}
+            )
+          `;
+          console.log("تم الحفظ في سيرفر Neon بنجاح!");
+        } catch (err) {
+          console.error("Neon Insert Error:", err);
+        }
+      }
+
       // حفظ السجل في ذاكرة المدير محلياً
       const allUsers = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
       allUsers.push(fullProfile);
@@ -1339,36 +1366,52 @@
       }
     }
 
-    function renderAdminDashboard() {
-      const users = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
-      const feedbacks = JSON.parse(localStorage.getItem('offshore_admin_feedbacks_list') || '[]');
+    async function renderAdminDashboard() {
+      let users = [];
+      let feedbacks = [];
+
+      // سحب بيانات جميع الطلاب من قاعدة بيانات Neon السحابية
+      if (window.neonSql) {
+        try {
+          users = await window.neonSql`SELECT * FROM players ORDER BY id DESC`;
+          feedbacks = await window.neonSql`SELECT * FROM feedbacks ORDER BY id DESC`;
+        } catch (err) {
+          console.error("خطأ في جلب بيانات Neon:", err);
+          // في حال انقطاع النت يتم الاعتماد على السجل المحلي
+          users = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
+          feedbacks = JSON.parse(localStorage.getItem('offshore_admin_feedbacks_list') || '[]');
+        }
+      } else {
+        users = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
+        feedbacks = JSON.parse(localStorage.getItem('offshore_admin_feedbacks_list') || '[]');
+      }
 
       document.getElementById('countUsers').textContent = users.length;
       document.getElementById('countFeedbacks').textContent = feedbacks.length;
 
       const uTbody = document.getElementById('adminUsersTbody');
       if (users.length === 0) {
-        uTbody.innerHTML = '<tr><td colspan="19" style="padding: 20px;">لا توجد بيانات مسجلة حتى الآن على هذا الجهاز.</td></tr>';
+        uTbody.innerHTML = '<tr><td colspan="19" style="padding: 20px;">لا توجد بيانات مسجلة حتى الآن.</td></tr>';
       } else {
         uTbody.innerHTML = users.map((u, i) => `
           <tr>
             <td>${i + 1}</td>
-            <td>${new Date(u.timestamp).toLocaleDateString('ar-SY')}</td>
+            <td>${new Date(u.created_at || u.timestamp).toLocaleDateString('ar-SY')}</td>
             <td style="font-weight:bold; color:var(--accent-cyan);">${u.name}</td>
             <td>${u.phone}</td>
-            <td>${u.birthYear}</td>
+            <td>${u.birth_year || u.birthYear}</td>
             <td>${u.governorate}</td>
             <td>${u.area}</td>
-            <td>${u.workStatus}</td>
+            <td>${u.work_status || u.workStatus}</td>
             <td>${u.university}</td>
             <td>${u.major}</td>
-            <td>${u.academicLevel}</td>
-            <td>${u.gradYear}</td>
-            <td>${u.hasTrained}</td>
-            <td>${u.trainingLocation}</td>
-            <td>${u.travelObstacle}</td>
-            <td>${u.safetyPerception}</td>
-            <td>${u.futureTraining}</td>
+            <td>${u.academic_level || u.academicLevel}</td>
+            <td>${u.grad_year || u.gradYear}</td>
+            <td>${u.has_trained || u.hasTrained}</td>
+            <td>${u.training_location || u.trainingLocation}</td>
+            <td>${u.travel_obstacle || u.travelObstacle}</td>
+            <td>${u.safety_perception || u.safetyPerception}</td>
+            <td>${u.future_training || u.futureTraining}</td>
             <td>${u.certifications}</td>
             <td>${u.software}</td>
           </tr>
@@ -1382,7 +1425,7 @@
         fTbody.innerHTML = feedbacks.map((f, i) => `
           <tr>
             <td>${i + 1}</td>
-            <td>${new Date(f.timestamp).toLocaleDateString('ar-SY')}</td>
+            <td>${new Date(f.created_at || f.timestamp).toLocaleDateString('ar-SY')}</td>
             <td style="font-weight:bold; color:var(--accent-green);">${f.name}</td>
             <td>${f.phone}</td>
             <td>${f.governorate}</td>
