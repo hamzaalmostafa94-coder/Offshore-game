@@ -51,6 +51,28 @@
     .meter-fill.warn { background: var(--accent-warn); }
     .meter-fill.danger { background: var(--accent-danger); }
 
+    /* شريط تنبيه الطوارئ والتحديات الهندسية الميدانية */
+    .emergency-alert-banner {
+      position: absolute; top: 78px; left: 50%; transform: translateX(-50%);
+      width: 580px; max-width: 92%; background: linear-gradient(135deg, rgba(255, 51, 68, 0.95), rgba(180, 20, 30, 0.95));
+      border: 2px solid #ff3344; border-radius: 12px; padding: 12px 18px; color: #fff;
+      box-shadow: 0 0 30px rgba(255, 51, 68, 0.7); backdrop-filter: blur(8px);
+      z-index: 50; display: flex; flex-direction: column; gap: 8px; text-align: center;
+      pointer-events: auto; animation: pulseEmergency 1.2s infinite alternate;
+    }
+    @keyframes pulseEmergency {
+      0% { box-shadow: 0 0 15px rgba(255, 51, 68, 0.4); transform: translateX(-50%) scale(1); }
+      100% { box-shadow: 0 0 35px rgba(255, 51, 68, 0.85); transform: translateX(-50%) scale(1.02); }
+    }
+    .emergency-header { font-size: 1rem; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+    .emergency-desc { font-size: 0.82rem; line-height: 1.4; color: #ffe4e6; }
+    .emergency-btn {
+      background: #fff; color: #b91c1c; border: none; padding: 9px 16px; border-radius: 8px;
+      font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+    }
+    .emergency-btn:hover { background: #ffeaec; transform: translateY(-1px); }
+
     .middle-area { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 10px; flex: 1; pointer-events: none; }
 
     .telemetry-panel {
@@ -115,6 +137,18 @@
     .dp-btn { background: #18283e; border: 1px solid #23436b; color: #cbd5e1; padding: 8px 0; border-radius: 6px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
     .dp-btn:hover { background: var(--accent-cyan); color: #000; }
 
+    /* لوحة معايرة أوتار التثبيت الخاصة بالمستوى 2 */
+    .tether-hud-box {
+      background: rgba(8, 18, 30, 0.8); border: 1px solid #1a3a5f; border-radius: 8px; padding: 10px;
+      display: flex; flex-direction: column; gap: 6px; font-size: 0.78rem;
+    }
+    .tether-row { display: flex; justify-content: space-between; align-items: center; }
+    .tether-bar-bg { width: 90px; height: 8px; background: #162438; border-radius: 4px; overflow: hidden; }
+    .tether-bar-fill { height: 100%; width: 50%; background: var(--accent-cyan); transition: width 0.3s; }
+    .tether-actions { display: flex; gap: 4px; }
+    .tether-btn { background: #1e3a5f; border: 1px solid #2f5686; color: #fff; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+    .tether-btn:hover { background: var(--accent-cyan); color: #000; }
+
     .bottom-bar {
       display: flex; justify-content: space-between; align-items: center; background: var(--panel-bg);
       border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px 20px; backdrop-filter: blur(10px);
@@ -149,270 +183,113 @@
     .tilt-bubble-box { width: 80px; height: 16px; background: #09121e; border: 1px solid #1a324f; border-radius: 8px; position: relative; overflow: hidden; }
     .tilt-bubble { position: absolute; top: 2px; left: 50%; width: 12px; height: 10px; background: var(--accent-cyan); border-radius: 5px; transform: translateX(-50%); transition: left 0.1s linear; }
 
-   
-    .update-check-btn {
-      background: linear-gradient(135deg, rgba(0, 210, 255, 0.18), rgba(0, 136, 204, 0.3));
-      border: 1px solid var(--accent-cyan);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 0.88rem;
-      font-weight: 700;
-      font-family: inherit;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 0 16px rgba(0, 210, 255, 0.25);
-      transition: all 0.25s ease;
+    /* كشف الحساب الهندسي ورتبة الإنجاز عند الفوز */
+    .scorecard-box {
+      background: rgba(14, 28, 46, 0.85); border: 1px solid #1f426e; border-radius: 12px;
+      padding: 16px; margin: 8px 0; display: flex; flex-direction: column; gap: 10px;
     }
-    .update-check-btn:hover {
-      background: linear-gradient(135deg, rgba(0, 210, 255, 0.35), rgba(0, 136, 204, 0.5));
-      box-shadow: 0 0 24px rgba(0, 210, 255, 0.5);
-      transform: translateY(-2px);
+    .score-rank-title { font-size: 1.15rem; font-weight: 800; color: var(--accent-cyan); }
+    .score-rank-stars { font-size: 1.4rem; letter-spacing: 4px; color: #ffd700; margin: 2px 0; }
+    .score-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: right;
     }
+    .score-item {
+      background: #0b1726; border: 1px solid #1a3454; padding: 8px 10px; border-radius: 6px;
+      font-size: 0.82rem; color: #94a3b8; display: flex; justify-content: space-between;
+    }
+    .score-item span { color: #fff; font-weight: bold; }
 
     /* Wizard Onboarding Styles */
     .wizard-progress {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-      position: relative;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; position: relative;
     }
-    .wizard-step-node {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      z-index: 2;
-    }
+    .wizard-step-node { display: flex; flex-direction: column; align-items: center; gap: 3px; z-index: 2; }
     .wizard-step-circle {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: #162a45;
-      border: 2px solid #284c7a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: bold;
-      color: #94a3b8;
-      transition: all 0.3s;
+      width: 26px; height: 26px; border-radius: 50%; background: #162a45; border: 2px solid #284c7a;
+      display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; color: #94a3b8;
     }
     .wizard-step-node.active .wizard-step-circle {
-      border-color: var(--accent-cyan);
-      background: var(--accent-cyan);
-      color: #050a12;
-      box-shadow: 0 0 10px var(--accent-cyan);
+      border-color: var(--accent-cyan); background: var(--accent-cyan); color: #050a12; box-shadow: 0 0 10px var(--accent-cyan);
     }
-    .wizard-step-node.completed .wizard-step-circle {
-      border-color: var(--accent-green);
-      background: var(--accent-green);
-      color: #050a12;
-    }
-    .wizard-step-title {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-    }
-    .wizard-step-node.active .wizard-step-title {
-      color: var(--accent-cyan);
-      font-weight: bold;
-    }
-    .wizard-progress-bar {
-      position: absolute;
-      top: 13px;
-      left: 15%;
-      right: 15%;
-      height: 2px;
-      background: #1b3353;
-      z-index: 1;
-    }
-    .wizard-progress-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--accent-cyan);
-      transition: width 0.3s ease;
-    }
+    .wizard-step-node.completed .wizard-step-circle { border-color: var(--accent-green); background: var(--accent-green); color: #050a12; }
+    .wizard-step-title { font-size: 0.7rem; color: var(--text-muted); }
+    .wizard-step-node.active .wizard-step-title { color: var(--accent-cyan); font-weight: bold; }
+    .wizard-progress-bar { position: absolute; top: 13px; left: 15%; right: 15%; height: 2px; background: #1b3353; z-index: 1; }
+    .wizard-progress-fill { height: 100%; width: 0%; background: var(--accent-cyan); transition: width 0.3s ease; }
 
-    .reg-input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      text-align: right;
-    }
-    .reg-input-group label {
-      font-size: 0.76rem;
-      color: #cbd5e1;
-    }
+    .reg-input-group { display: flex; flex-direction: column; gap: 4px; text-align: right; }
+    .reg-input-group label { font-size: 0.76rem; color: #cbd5e1; }
     .reg-input-group input, .reg-input-group select, .reg-input-group textarea {
-      background: #13243a;
-      border: 1px solid #204570;
-      color: #fff;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 0.84rem;
-      outline: none;
-      transition: border-color 0.2s;
+      background: #13243a; border: 1px solid #204570; color: #fff; padding: 8px 10px; border-radius: 8px;
+      font-family: inherit; font-size: 0.84rem; outline: none; transition: border-color 0.2s;
     }
-    .reg-input-group input:focus, .reg-input-group select:focus, .reg-input-group textarea:focus {
-      border-color: var(--accent-cyan);
-    }
-    .reg-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .wizard-actions {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 10px;
-    }
+    .reg-input-group input:focus, .reg-input-group select:focus, .reg-input-group textarea:focus { border-color: var(--accent-cyan); }
+    .reg-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .wizard-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; }
 
-    /* Cards Style */
-    .info-card {
-      width: 550px;
-      text-align: center;
-      gap: 14px;
-    }
-    .hero-icon {
-      font-size: 2.8rem;
-      margin-bottom: -6px;
-      animation: floatRig 3s infinite ease-in-out;
-    }
-    @keyframes floatRig {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-7px); }
-    }
+    .info-card { width: 550px; text-align: center; gap: 14px; }
+    .hero-icon { font-size: 2.8rem; margin-bottom: -6px; animation: floatRig 3s infinite ease-in-out; }
+    @keyframes floatRig { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
     .card-text-box {
-      font-size: 0.88rem;
-      color: #cbd5e1;
-      line-height: 1.6;
-      text-align: justify;
-      background: rgba(16, 28, 45, 0.65);
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid rgba(0, 210, 255, 0.18);
+      font-size: 0.88rem; color: #cbd5e1; line-height: 1.6; text-align: justify;
+      background: rgba(16, 28, 45, 0.65); padding: 14px; border-radius: 10px; border: 1px solid rgba(0, 210, 255, 0.18);
     }
 
-    /* Level Briefing Specs Grid */
-    .specs-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin: 8px 0;
-      text-align: right;
-    }
-    .spec-item {
-      background: rgba(19, 36, 58, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-    }
-    .spec-title {
-      color: var(--accent-cyan);
-      font-weight: bold;
-      font-size: 0.75rem;
-      margin-bottom: 2px;
-    }
+    .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; text-align: right; }
+    .spec-item { background: rgba(19, 36, 58, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; }
+    .spec-title { color: var(--accent-cyan); font-weight: bold; font-size: 0.75rem; margin-bottom: 2px; }
 
     .hidden { display: none !important; }
 
-    /* أزرار التفعيل السرية للمدير */
-    #adminSecretTrigger {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 80px;
-      height: 80px;
-      z-index: 999999;
-      cursor: pointer;
-      background: transparent;
-    }
+    #adminSecretTrigger { position: fixed; top: 0; right: 0; width: 80px; height: 80px; z-index: 999999; cursor: pointer; background: transparent; }
+    .card-admin-hotspot { position: absolute; top: 10px; right: 14px; width: 55px; height: 55px; z-index: 50; cursor: pointer; background: transparent; }
 
-    .card-admin-hotspot {
-      position: absolute;
-      top: 10px;
-      right: 14px;
-      width: 55px;
-      height: 55px;
-      z-index: 50;
-      cursor: pointer;
-      background: transparent;
-    }
-
-    /* لوحة تحكم المدير */
-    .admin-card {
-      width: 920px;
-      max-width: 96%;
-      max-height: 90vh;
-      overflow-y: auto;
-      text-align: right;
-    }
-    .admin-table-box {
-      overflow-x: auto;
-      margin: 10px 0;
-      border: 1px solid #1e3a5f;
-      border-radius: 8px;
-    }
-    .admin-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.78rem;
-      color: #e2e8f0;
-    }
-    .admin-table th, .admin-table td {
-      padding: 8px 10px;
-      border: 1px solid #1a324f;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .admin-table th {
-      background: #142338;
-      color: var(--accent-cyan);
-      font-weight: bold;
-    }
-    .admin-table tr:nth-child(even) {
-      background: rgba(255, 255, 255, 0.02);
-    }
-    .admin-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
+    .admin-card { width: 920px; max-width: 96%; max-height: 90vh; overflow-y: auto; text-align: right; }
+    .admin-table-box { overflow-x: auto; margin: 10px 0; border: 1px solid #1e3a5f; border-radius: 8px; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; color: #e2e8f0; }
+    .admin-table th, .admin-table td { padding: 8px 10px; border: 1px solid #1a324f; text-align: center; white-space: nowrap; }
+    .admin-table th { background: #142338; color: var(--accent-cyan); font-weight: bold; }
+    .admin-table tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+    .admin-tabs { display: flex; gap: 10px; margin-bottom: 8px; }
     .admin-tab-btn {
-      background: #162a45;
-      border: 1px solid #284c7a;
-      color: #94a3b8;
-      padding: 7px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.85rem;
+      background: #162a45; border: 1px solid #284c7a; color: #94a3b8; padding: 7px 16px; border-radius: 6px;
+      cursor: pointer; font-family: inherit; font-size: 0.85rem;
     }
-    .admin-tab-btn.active {
-      background: var(--accent-cyan);
-      color: #050a12;
-      font-weight: bold;
-      border-color: var(--accent-cyan);
-    }
+    .admin-tab-btn.active { background: var(--accent-cyan); color: #050a12; font-weight: bold; border-color: var(--accent-cyan); }
   </style>
   <script src="three.min.js"></script>
+  <!-- ربط محرك قاعدة بيانات Neon السحابية -->
   <script type="module">
-  import { neon } from "https://esm.sh/@neondatabase/serverless";
-  // رابط اتصال قاعدة بيانات Neon الخاص بك
-  window.neonSql = neon("postgresql://neondb_owner:npg_SqP8dmTyWaR3@ep-crimson-bar-ayjmuaev-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require");
-</script>
+    import { neon } from "https://esm.sh/@neondatabase/serverless";
+    try {
+      window.neonSql = neon("postgresql://neondb_owner:npg_SqP8dmTyWaR3@ep-crimson-bar-ayjmuaev-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require");
+      console.log("Neon database ready!");
+    } catch(err) {
+      console.error("Neon init error:", err);
+    }
+  </script>
 </head>
 <body>
   <div id="webgl-container"></div>
 
   <!-- 1. منطقة النقر السرية في أقصى يمين الشاشة العلوية -->
   <div id="adminSecretTrigger" onclick="handleAdminSecretTrigger()" ondblclick="openAdminLogin()" title=""></div>
+
+  <!-- 2. لافتة طوارئ التحديات الهندسية الميدانية في منتصف الشاشة -->
+  <div id="emergencyBanner" class="emergency-alert-banner hidden">
+    <div class="emergency-header">
+      <span id="emergencyTitle">⚠️ إنذار طارئ: عدم اتزان صهاريج الغمر!</span>
+      <span id="emergencyTimer" style="background:#000; padding:2px 8px; border-radius:4px; font-size:0.8rem;">8s</span>
+    </div>
+    <div id="emergencyDesc" class="emergency-desc">
+      اختلال توزيع مياه الموازنة يهدد بتصدع زاوية القاعدة الخرسانية. اضغط لمعادلة الصهاريج فوراً!
+    </div>
+    <div style="margin-top: 4px;">
+      <button id="emergencyActionBtn" class="emergency-btn" onclick="resolveCurrentEmergency()">
+        ⚖️ تشغيل مضخات الموازنة (Trim Ballast Pumps)
+      </button>
+    </div>
+  </div>
 
   <div class="ui-overlay">
     <div class="top-bar interactive">
@@ -478,7 +355,7 @@
         <div class="panel-header"><span>🏗️ مراحل التشييد الهندسي</span><span id="phasePercent" style="color: var(--accent-cyan); font-size: 0.85rem;">0%</span></div>
         <div id="step1" class="phase-step active">
           <div class="step-number">1</div>
-          <div><div style="font-weight: 600;">محاذاة موقع الحفر</div><div style="font-size: 0.75rem; color: var(--text-muted);">تثبيت المنصة في دائرة الأمان &lt; 6م</div></div>
+          <div><div style="font-weight: 600;">محاذاة موقع الحفر</div><div id="step1Desc" style="font-size: 0.75rem; color: var(--text-muted);">تثبيت المنصة في دائرة الأمان &lt; 3.5م</div></div>
         </div>
         <div id="step2" class="phase-step">
           <div class="step-number">2</div>
@@ -492,6 +369,47 @@
           <div class="step-number">4</div>
           <div><div style="font-weight: 600;">شد الكابلات وتمديد الأنابيب</div><div style="font-size: 0.75rem; color: var(--text-muted);">معايرة كابلات التثبيت وبدء التدفق</div></div>
         </div>
+
+        <!-- لوحة معايرة أوتار الشد TLP (تظهر في المستوى 2 عند مرحلة التثبيت) -->
+        <div id="tetherHud" class="tether-hud-box hidden">
+          <div style="font-weight:bold; color:var(--accent-cyan); display:flex; justify-content:space-between;">
+            <span>معايرة شد الأوتار (TLP Tethers)</span>
+            <span id="tetherStatusText" style="color:var(--accent-green)">متزن</span>
+          </div>
+          <div class="tether-row">
+            <span>الوتر الشمالي (N):</span>
+            <div class="tether-bar-bg"><div id="barTetherN" class="tether-bar-fill" style="width:50%;"></div></div>
+            <div class="tether-actions">
+              <button class="tether-btn" onclick="adjustTether('N', 10)">+</button>
+              <button class="tether-btn" onclick="adjustTether('N', -10)">-</button>
+            </div>
+          </div>
+          <div class="tether-row">
+            <span>الوتر الجنوبي (S):</span>
+            <div class="tether-bar-bg"><div id="barTetherS" class="tether-bar-fill" style="width:50%;"></div></div>
+            <div class="tether-actions">
+              <button class="tether-btn" onclick="adjustTether('S', 10)">+</button>
+              <button class="tether-btn" onclick="adjustTether('S', -10)">-</button>
+            </div>
+          </div>
+          <div class="tether-row">
+            <span>الوتر الشرقي (E):</span>
+            <div class="tether-bar-bg"><div id="barTetherE" class="tether-bar-fill" style="width:50%;"></div></div>
+            <div class="tether-actions">
+              <button class="tether-btn" onclick="adjustTether('E', 10)">+</button>
+              <button class="tether-btn" onclick="adjustTether('E', -10)">-</button>
+            </div>
+          </div>
+          <div class="tether-row">
+            <span>الوتر الغربي (W):</span>
+            <div class="tether-bar-bg"><div id="barTetherW" class="tether-bar-fill" style="width:50%;"></div></div>
+            <div class="tether-actions">
+              <button class="tether-btn" onclick="adjustTether('W', 10)">+</button>
+              <button class="tether-btn" onclick="adjustTether('W', -10)">-</button>
+            </div>
+          </div>
+        </div>
+
         <button id="btnMainAction" class="action-button" onclick="executeCurrentPhase()"><span>بدء إنزال القاعدة البحرية</span></button>
         <div id="phaseInstruction" style="font-size: 0.8rem; color: #a0aec0; line-height: 1.4; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px;">
           💡 استخدم دوافع الـ DP للحفاظ على تمركز المنصة فوق الهدف أثناء تنفيذ مهام الرفع والإنزال.
@@ -639,6 +557,7 @@
                 <option value="" disabled selected>اختر التخصص</option>
                 <option value="هندسة مدنية">هندسة مدنية</option>
                 <option value="هندسة بترول">هندسة بترول</option>
+                <option value="هندسة بترول ونفط">هندسة بترول ونفط</option>
                 <option value="هندسة بترولية">هندسة بترولية</option>
                 <option value="هندسة ميكانيكية">هندسة ميكانيكية</option>
                 <option value="هندسة كهربائية وحواسيب">هندسة كهربائية وحواسيب</option>
@@ -739,36 +658,33 @@
     </div>
   </div>
 
-  <!-- 3. نافذة اختيار المستوى (مع زر التحديث مكان الخط الأصفر + الزر السري) -->
+  <!-- 3. نافذة اختيار المستوى -->
   <div id="gameModal" class="modal-backdrop hidden">
-    
-
     <div id="modalCard" class="modal-card">
-      <!-- منطقة النقر السرية في أعلى يمين بطاقة المستويات -->
       <div class="card-admin-hotspot" onclick="handleAdminSecretTrigger()" ondblclick="openAdminLogin()" title=""></div>
 
       <h2 id="modalTitle" onclick="handleAdminSecretTrigger()" ondblclick="openAdminLogin()" style="cursor: pointer;">اختيار مشروع الحفر البحري</h2>
-      <p id="modalDesc" style="color: var(--text-muted); font-size: 0.9rem;">اختر بيئة العمل لمعاينة التعليمات الهندسية ومواصفات المشروع:</p>
+      <p id="modalDesc" style="color: var(--text-muted); font-size: 0.9rem;">اختر بيئة العمل لمعاينة التعليمات الهندسية ومواصفات المشروع والتحديات الحصرية:</p>
       
       <div id="scenarioList" class="scenario-selector">
         <div class="scenario-btn" onclick="openLevelBriefing(1)">
           <div>
             <div style="font-weight: 700; color: var(--accent-green);">المستوى 1: المياه الضحلة (الخليج العربي)</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 40م | طقس هادئ | منصة خرسانية GBS</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 40م | منصة GBS | تحدي دقة التمركز &lt; 3.5م وموازنة صهاريج الغمر</div>
           </div>
           <span style="color: var(--accent-cyan); font-weight: bold;">تعليمات وبدء ▶</span>
         </div>
         <div class="scenario-btn" onclick="openLevelBriefing(2)">
           <div>
             <div style="font-weight: 700; color: var(--accent-warn);">المستوى 2: بحر الشمال العاصف</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 250م | أمواج ورياح قوية | منصة TLP بالأرجل المشدودة</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 250م | منصة TLP | هبوب رياح مباغت ومعايرة شد أوتار التثبيت</div>
           </div>
           <span style="color: var(--accent-warn); font-weight: bold;">تعليمات وبدء ▶</span>
         </div>
         <div class="scenario-btn" onclick="openLevelBriefing(3)">
           <div>
             <div style="font-weight: 700; color: var(--accent-danger);">المستوى 3: المياه فائقة العمق (المحيط الأطلسي)</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 800م | عاصفة ليلية وصواعق | سفينة حفر / شبه غاطسة</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 800م | سفينة حفر | عاصفة ليلية، خطر كسر ذراع الحفر، وأعطال الدوافع</div>
           </div>
           <span style="color: var(--accent-danger); font-weight: bold;">تعليمات وبدء ▶</span>
         </div>
@@ -799,7 +715,7 @@
         </div>
         <div class="spec-item">
           <div class="spec-title">نطاق الأمان المسموح للـ DP</div>
-          <div id="specDPTolerance" style="color: var(--accent-green);">انحراف أقل من 6.0 متر</div>
+          <div id="specDPTolerance" style="color: var(--accent-green);">انحراف دقيق جداً < 3.5 متر</div>
         </div>
       </div>
 
@@ -816,31 +732,44 @@
     </div>
   </div>
 
-  <!-- 5. نافذة الاقتراحات والملاحظات بعد إنهاء المستوى الأول -->
+<!-- 5. نافذة التقييم الهندسي والاقتراحات بعد إنهاء المستوى الأول -->
   <div id="feedbackModal" class="modal-backdrop hidden">
-    <div class="modal-card info-card">
-      <div class="hero-icon" style="color: var(--accent-green);">🏆</div>
-      <h2 style="color: var(--accent-green);">تهانينا! تم إنجاز المستوى الأول بنجاح</h2>
+    <div class="modal-card info-card" style="width: 580px;">
+      <div class="hero-icon" style="color: var(--accent-green); font-size: 2.2rem; margin-bottom: 2px;">🏆</div>
+      <h2 style="color: var(--accent-green); font-size: 1.25rem;">تهانينا! تم إنجاز المستوى الأول بنجاح</h2>
       
-      <div class="card-text-box" style="text-align: center;">
-        بصفتك مهندساً ومشاركاً في تجربة المستوى الأول، رأيك القيّم يساعدنا في تطوير المحاكي وإضافة ميزات أكثر واقعية. ما هي اقتراحاتك أو ملاحظاتك الهندسية لتحسين محاكي تركيب المنصات البحرية؟
+      <!-- كشف الحساب والرتبة الهندسية الممنوحة فوراً للمستوى 1 -->
+      <div id="lvl1Scorecard" class="scorecard-box">
+        <div id="sc1RankStars" class="score-rank-stars">⭐⭐⭐ A+</div>
+        <div id="sc1RankTitle" class="score-rank-title">مهندس استشاري بحري أول</div>
+        <div class="score-grid" style="margin-top: 6px;">
+          <div class="score-item">الميزانية المحفوظة: <span id="sc1Budget">$0</span></div>
+          <div class="score-item">الوقود المتبقي: <span id="sc1Fuel">0%</span></div>
+          <div class="score-item">سلامة الهيكل: <span id="sc1Integrity">0%</span></div>
+          <div class="score-item">زمن الإنجاز: <span id="sc1Time">0s</span></div>
+        </div>
       </div>
 
-      <div class="reg-input-group" style="margin-top: 4px;">
-        <textarea id="uFeedbackText" rows="4" placeholder="اكتب اقتراحاتك، ميزات برمجية ترغب بوجودها، أو ملاحظاتك حول فيزياء المحاكاة هنا..."></textarea>
+      <div class="card-text-box" style="text-align: center; padding: 10px; font-size: 0.82rem;">
+        بصفتك مهندساً أنجز هذا المشروع، ما هي اقتراحاتك أو ملاحظاتك الهندسية لتطوير المحاكي؟
+      </div>
+
+      <div class="reg-input-group">
+        <textarea id="uFeedbackText" rows="3" placeholder="اكتب اقتراحاتك لتطوير المحاكي هنا..."></textarea>
       </div>
 
       <div class="wizard-actions">
         <button type="button" class="btn-secondary" onclick="skipFeedbackAndProceed()" style="width: 140px;">
-          <span>تخطي للمستوى 2 ◀</span>
+          تخطي للمستوى 2 ◀
         </button>
         <button type="button" id="btnSendFeedback" class="action-button" onclick="submitFeedbackAndProceed()" style="flex: 1;">
-          <span>إرسال الاقتراح والانتقال للمستوى الثاني ▶</span>
+          إرسال الاقتراح والانتقال للمستوى الثاني ▶
         </button>
       </div>
       <div id="feedbackStatus" style="font-size: 0.8rem; color: var(--accent-cyan); display: none; margin-top: 4px;">جاري إرسال اقتراحك...</div>
     </div>
   </div>
+  
 
   <!-- 6. نافذة إدخال كلمة سر المدير -->
   <div id="adminPassModal" class="modal-backdrop hidden" style="z-index: 100000;">
@@ -858,11 +787,11 @@
     </div>
   </div>
 
-  <!-- 7. لوحة تحكم المدير (عرض البيانات والاقتراحات والتصدير) -->
+  <!-- 7. لوحة تحكم المدير (عرض البيانات والاقتراحات وتصدير الإكسل المنسق) -->
   <div id="adminPanelModal" class="modal-backdrop hidden" style="z-index: 100000;">
     <div class="modal-card admin-card">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e3a5f; padding-bottom: 10px;">
-        <h2 style="font-size: 1.25rem;">📊 سجل بيانات المستخدمين والاقتراحات (خاص بالمدير)</h2>
+        <h2 style="font-size: 1.25rem;">📊 سجل بيانات المستخدمين والاقتراحات (قاعدة بيانات Neon)</h2>
         <button type="button" class="btn-secondary" onclick="closeAdminModals()" style="padding: 4px 12px;">✕ إغلاق</button>
       </div>
 
@@ -871,11 +800,13 @@
           <button type="button" id="tabBtnUsers" class="admin-tab-btn active" onclick="switchAdminTab('users')">قائمة المستخدمين المسجلين (<span id="countUsers">0</span>)</button>
           <button type="button" id="tabBtnFeedback" class="admin-tab-btn" onclick="switchAdminTab('feedback')">اقتراحات المستوى الأول (<span id="countFeedbacks">0</span>)</button>
         </div>
-         <button type="button" class="action-button" onclick="exportAdminDataToExcel()" 
-        style="width: auto; padding: 8px 18px; font-size: 0.85rem; background: linear-gradient(135deg, #107c41, #0b5a2f); border: 1px solid #00ff88;">
-       📥 تصدير السجل كملف Excel (CSV)
+        <button type="button" class="action-button" onclick="exportAdminDataToExcel()" 
+                style="width: auto; padding: 8px 18px; font-size: 0.85rem; background: linear-gradient(135deg, #107c41, #0b5a2f); border: 1px solid #00ff88;">
+          📥 تصدير السجل كملف Excel (.xls)
         </button>
       </div>
+
+      <div id="adminNoticeBox" style="display: none;"></div>
 
       <div id="adminUsersView" class="admin-table-box">
         <table class="admin-table">
@@ -900,11 +831,11 @@
               <th>التدريبات المطلوبة</th>
               <th>الشهادات</th>
               <th>البرمجيات</th>
-              <th style="color: #ff3344;">إجراء</th> <!-- أضف هذا السطر هنا -->
+              <th style="color: #ff3344;">إجراء</th>
             </tr>
           </thead>
           <tbody id="adminUsersTbody">
-            <tr><td colspan="19" style="padding: 20px;">لا توجد بيانات مسجلة حتى الآن على هذا الجهاز.</td></tr>
+            <tr><td colspan="20" style="padding: 20px;">جاري تحميل البيانات من سيرفر Neon...</td></tr>
           </tbody>
         </table>
       </div>
@@ -920,10 +851,11 @@
               <th>المحافظة</th>
               <th>المستوى</th>
               <th>نص الاقتراح / الملاحظات</th>
+              <th style="color: #ff3344;">إجراء</th>
             </tr>
           </thead>
           <tbody id="adminFeedbackTbody">
-            <tr><td colspan="7" style="padding: 20px;">لا توجد اقتراحات مسجلة بعد.</td></tr>
+            <tr><td colspan="8" style="padding: 20px;">جاري تحميل الاقتراحات من سيرفر Neon...</td></tr>
           </tbody>
         </table>
       </div>
@@ -932,39 +864,6 @@
   </div>
 
   <script>
-    /* =========================================================================
-       إعدادات الإصدار والتحديثات
-       ========================================================================= */
-    const CURRENT_APP_VERSION = "1.0.0";
-    // رابط فحص التحديثات (يمكنكم وضع رابط ملف version.json على Netlify أو Google Drive لاحقاً)
-    const UPDATE_CHECK_URL = ""; 
-    const UPDATE_DOWNLOAD_PAGE = "https://your-game-update-link.com"; // رابط تحميل النسخة الأحدث
-
-    function checkForAppUpdates() {
-      // إذا لم يكن هناك سيرفر تحديث بعد، أو التطبيق في نسخته الأولى:
-      if (!UPDATE_CHECK_URL) {
-        alert("✅ أنت الآن لديك أحدث نسخة من محاكي تركيب المنصات البحرية (الإصدار: " + CURRENT_APP_VERSION + ").\n\nعند توفر أي تحديثات ومراحل جديدة مستقبلاً ستتمكن من تنزيلها بضغطة زر من هنا.");
-        return;
-      }
-
-      // في حال توفر رابط السيرفر السحابي
-      fetch(UPDATE_CHECK_URL)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.latestVersion && data.latestVersion !== CURRENT_APP_VERSION) {
-            const confirmUpdate = confirm("🚀 يتوفر تحديث جديد للمحاكي!\n\nالإصدار الجديد: " + data.latestVersion + "\nما الجديد: " + (data.notes || "مراحل وتحسينات هندسية جديدة") + "\n\nهل ترغب بالانتقال لتحميل النسخة الأحدث الآن؟");
-            if (confirmUpdate) {
-              window.open(data.downloadUrl || UPDATE_DOWNLOAD_PAGE, '_blank');
-            }
-          } else {
-            alert("✅ أنت الآن لديك أحدث نسخة من محاكي تركيب المنصات البحرية (الإصدار: " + CURRENT_APP_VERSION + ").");
-          }
-        })
-        .catch(err => {
-          alert("✅ أنت الآن لديك أحدث نسخة من محاكي تركيب المنصات البحرية (الإصدار: " + CURRENT_APP_VERSION + ").");
-        });
-    }
-
     /* =========================================================================
        إدارة النوافذ ومعالج التسجيل
        ========================================================================= */
@@ -1110,7 +1009,7 @@
         timestamp: new Date().toISOString()
       };
 
-      // إرسال البيانات فوراً إلى سيرفر Neon السحابي
+      // 1. الحفظ السحابي المباشر في قاعدة بيانات Neon
       if (window.neonSql) {
         try {
           await window.neonSql`
@@ -1132,12 +1031,7 @@
         }
       }
 
-      // حفظ السجل في ذاكرة المدير محلياً
-      const allUsers = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
-      allUsers.push(fullProfile);
-      localStorage.setItem('offshore_admin_users_list', JSON.stringify(allUsers));
-
-      // حفظ حالة تسجيل المستخدم
+      // 2. الحفظ المحلي كنسخة احتياطية
       localStorage.setItem('offshore_user_registered', 'true');
       localStorage.setItem('offshore_user_profile', JSON.stringify(fullProfile));
 
@@ -1149,9 +1043,7 @@
       gameModal.classList.remove('hidden');
     }
 
-    /* =========================================================================
-       لوحة تعليمات وشرح المستوى الفني
-       ========================================================================= */
+    /* تعريف مواصفات وتحديات المستويات الثلاثة */
     const LEVEL_DATA = {
       1: {
         title: "مشروع تركيب منصة المياه الضحلة (الخليج العربي)",
@@ -1160,16 +1052,14 @@
         depth: "40 متراً",
         platform: "منصة جاذبية خرسانية ثقيلة (GBS)",
         weather: "طقس نهار هادئ (رياح 8 عقد / أمواج 0.6م)",
-        tolerance: "انحراف أقل من 6.0 متر",
+        tolerance: "انحراف دقيق جداً < 3.5 متر",
         instructions: `
           <b>🎯 الهدف الهندسي للمهمة:</b><br>
-          تثبيت قاعدة ثقيلة تعتمد على وزن الجاذبية (GBS) على قاع صخري/رملي مستوٍ، ثم رفع السطح العلوي وبرج الحفر وتوصيل خطوط التدفق.<br><br>
-          <b>🛠️ ما ستراه وتفعله بالترتيب:</b><br>
-          1. <b>تمركز الـ DP:</b> حافظ على موقع المنصة في الرادار داخل دائرة الأمان الخضراء (&lt; 6م) باستخدام أزرار (WASD أو الأسهم).<br>
-          2. <b>إنزال ونش القاعدة:</b> اضغط الزر الأزرق لتشغيل رافعة الإنزال ببطء نحو القعر.<br>
-          3. <b>تجميع السطح (Topsides):</b> بعد استقرار القاعدة، اضغط لرفع وتثبيت برج الحفر وغرف الإعاشة ومهبط الطائرات.<br>
-          4. <b>شد الكابلات والأنابيب:</b> المرحلة الأخيرة لمعايرة الأنابيب وتدفق الإنتاج بنجاح.<br><br>
-          💡 <i>نصيحة أمان: لا تستعجل إنزال الونش قبل التأكد من ثبات المنصة وتوسطها فوق الهدف.</i>
+          تثبيت قاعدة ثقيلة تعتمد على وزن الجاذبية (GBS) على قاع صخري/رملي مستوٍ، ثم رفع السطح وتوصيل خطوط التدفق.<br><br>
+          <b>⚡ التحديات الهندسية الحصرية للمستوى 1:</b><br>
+          1. <b>دقة التموضع الصارمة (&lt; 3.5م):</b> لا يمكن تعديل موقع القاعدة بعد ملامسة الرمل. يجب أن تثبت المنصة بدقة عالية قبل الضغط على الإنزال.<br>
+          2. <b>تحدي موازنة صهاريج الغمر (Ballast Water Trim):</b> أثناء إنزال الونش في المرحلة 2، تمتلئ الصهاريج بمياه البحر. إذا حدث أي اختلال في الاتزان (تجاوز الميلان 3.5°)، سينطلق إنذار أحمر، وعليك الضغط فوراً على زر <b>[تشغيل مضخات الموازنة Trim Pumps]</b> لمعادلة الميلان قبل تصدع القاعدة الخرسانية!<br><br>
+          💡 <i>نصيحة أمان: لا تستعجل إنزال الونش قبل ضبط التمركز التام وتصحيح أي ميلان بالصهاريج.</i>
         `
       },
       2: {
@@ -1178,17 +1068,16 @@
         icon: "🌊",
         depth: "250 متراً",
         platform: "منصة الأوتار المشدودة (Tension-Leg Platform - TLP)",
-        weather: "أمطار وأمواج متلاطمة (رياح 20 عقدة / أمواج 1.6م)",
-        tolerance: "انحراف أقل من 7.5 متر",
+        weather: "أمطار وأمواج متلاطمة (رياح 20-35 عقدة / أمواج 1.8م)",
+        tolerance: "انحراف مسموح < 7.0 متر",
         instructions: `
           <b>🎯 الهدف الهندسي للمهمة:</b><br>
-          في هذا العمق المتقدم، لا يمكن استخدام القواعد الخرسانية الثابتة، بل يتم تثبيت أوتار شد فولاذية رأسية (Tethers) ترتبط بمراسي القاع وتمنع الحركة الرأسية مع السماح بحركة أفقية محدودة.<br><br>
-          <b>🛠️ ما ستراه وتفعله بالترتيب:</b><br>
-          1. <b>مقاومة الرياح الشديدة:</b> ستلاحظ انزلاقاً أسرع للمنصة؛ يمكنك استخدام <b>(DP آلي)</b> لمساعدتك في تثبيت الموقع.<br>
-          2. <b>إنزال قوالب الإرساء:</b> إنزال رؤوس الآبار إلى عمق 250 متراً تحت أمواج سطحية نشطة.<br>
-          3. <b>تثبيت السطح ومراقبة الميلان:</b> راقب مؤشر الزاوية الزئبقي (Tilt) جيداً لتفادي تجاوز الحد الحرج.<br>
-          4. <b>معايرة شد الأوتار:</b> إحكام توازن الشد بين الأوتار الأربعة لإتمام التثبيت.<br><br>
-          💡 <i>نصيحة أمان: استهلك وقود الدوافع بحكمة لتفادي نفاده أثناء مقاومة العاصفة.</i>
+          تثبيت منصة عائمة مربوطة بأوتار شد فولاذية رأسية (Tethers) ترتبط بمراسي القاع على عمق 250 متراً.<br><br>
+          <b>⚡ التحديات الهندسية الحصرية للمستوى 2:</b><br>
+          1. <b>هبوب الرياح المباغت (Wind Squalls):</b> كل 20 ثانية ستضرب هبة رياح عنيفة تغير اتجاه الانجراف فجأة، وتتطلب تدخلاً يدوياً حاسماً بالدوافع (WASD).<br>
+          2. <b>فخ استهلاك الوقود المضاعف:</b> نظام الـ DP الآلي يستهلك الوقود بمعدل 3 أضعاف بسبب قوة الأمواج. تجنب الاعتماد الدائم على الآلي لئلا ينفد الوقود!<br>
+          3. <b>معايرة شد الأوتار الأربعة (Tether Tension Balancing):</b> في المرحلة الرابعة، يجب عليك مراقبة لوحة الأوتار (شمال، جنوب، شرق، غرب) واستخدام أزرار الشد للحفاظ على كل وتر بين 35% و 80%. فرط الشد يقطع الوتر، وارتخاؤه يقلب المنصة!<br><br>
+          💡 <i>نصيحة أمان: قُد الدوافع يدوياً، واستخدم الـ DP الآلي لثوانٍ معدودة عند الطوارئ فقط.</i>
         `
       },
       3: {
@@ -1196,22 +1085,24 @@
         badge: "المستوى 3: المياه فائقة العمق (Atlantic Storm)",
         icon: "⚡",
         depth: "800 متر",
-        platform: "منصة شبه غاطسة / سفينة حفر متطورة (Semi-Submersible)",
-        weather: "عاصفة ليلية وصواعق رعدية (رياح 32 عقدة / أمواج 2.6م)",
-        tolerance: "انحراف أقل من 9.0 متر",
+        platform: "سفينة حفر متطورة / شبه غاطسة (Drillship)",
+        weather: "عاصفة ليلية وصواعق رعدية (رياح 34-45 عقدة / أمواج 2.8م)",
+        tolerance: "خطر كسر ذراع الحفر عند ميلان > 10.0°",
         instructions: `
           <b>🎯 الهدف الهندسي للمهمة:</b><br>
-          مهمة الخبراء في أقصى الظروف البحرية؛ حيث يتم الاعتماد المطلق على نظام الدوافع النفاثة خماسية الاتجاهات وتطبيقات السلامة البحرية العليا.<br><br>
-          <b>🛠️ ما ستراه وتفعله بالترتيب:</b><br>
-          1. <b>التحكم الليلي:</b> استخدم كاشفات الإضاءة الليلية (Floodlights) للمعاينة وسط الأمطار والصواعق.<br>
-          2. <b>موازنة زوايا الميلان الخطيرة:</b> اضبط توازن المنصة وتفادَ تجاوز زاوية الميلان 28 درجة لحماية أنابيب الحفر من الكسر.<br>
-          3. <b>إنزال منظومة مانع الانفجار (BOP):</b> إنزال أثقل معدات السيطرة على الآبار لقعر المحيط.<br>
-          4. <b>إتمام الوصلات البحرية وإنقاذ المهمة قبل نفاد نافذة الطقس المتاحة.</b><br><br>
-          💡 <i>نصيحة أمان: التدخل اليدوي السريع بمحركات الدفع مع الـ DP الآلي يضمن نجاتك.</i>
+          العمليات البحرية القصوى لإنزال منظومة مانع الانفجار الثقيلة (BOP) لعمق 800 متر وسط عاصفة بحرية ليلية وظلام دامس.<br><br>
+          <b>⚡ التحديات الهندسية الحصرية للمستوى 3:</b><br>
+          1. <b>خطر قص ذراع الحفر (Drill Riser Shear Hazard):</b> زاوية الميلان الحرجة أصبحت <b>10 درجات فقط</b>! أي ميلان يتجاوزها سيكسر أنبوب الحفر فوراً ويسبب كارثة بيئية وخسارة المهمة.<br>
+          2. <b>أعطال القواطع الكهربائية للدوافع (Thruster Power Trip):</b> بسبب الصواعق والأحمال القصوى، ينفصل أحد الدوافع الرئيسية فجأة وتفقد السفينة توازنها. يظهر زر طوارئ وامض <b>[إعادة ضبط القاطع Reset Breaker]</b> ويجب عليك الضغط عليه خلال 7 ثوانٍ قبل الانجراف الكارثي!<br>
+          3. <b>نافذة الطقس المتضائلة:</b> تشتد العاصفة تدريجياً ويزداد ارتفاع الموج مع الوقت، مما يجعل سرعة الإنجاز حاسمة.<br><br>
+          💡 <i>نصيحة أمان: شغّل الكاشفات الليلية (Floodlights) فوراً وراقب مؤشر الزاوية الزئبقي دون انقطاع.</i>
         `
       }
     };
 
+    /* =========================================================================
+       لوحة تعليمات وشرح المستوى الفني والتحديات
+       ========================================================================= */
     function openLevelBriefing(levelId) {
       pendingLevelId = levelId;
       const data = LEVEL_DATA[levelId];
@@ -1249,9 +1140,29 @@
     }
 
     /* =========================================================================
-       اقتراحات نهاية المستوى الأول
+       معالجة اقتراحات إنهاء المستوى الأول
        ========================================================================= */
     function showLevel1FeedbackModal() {
+      // حساب الرتبة الهندسية بناءً على كفاءة الميزانية والوقود
+      let rankStars = "⭐ B";
+      let rankTitle = "مساعد مهندس ميداني (Junior Field Engineer)";
+      
+      if (gameState.budget > 2800000 && gameState.integrity >= 80 && gameState.fuel >= 40) {
+        rankStars = "⭐⭐⭐ A+";
+        rankTitle = "مهندس استشاري بحري أول (Master Offshore Superintendent)";
+      } else if (gameState.budget > 1800000 && gameState.integrity >= 65) {
+        rankStars = "⭐⭐ A";
+        rankTitle = "مهندس عمليات بحرية متمرس (Field Operations Engineer)";
+      }
+
+      // تعبئة البيانات في كشف الحساب
+      document.getElementById('sc1RankStars').textContent = rankStars;
+      document.getElementById('sc1RankTitle').textContent = rankTitle;
+      document.getElementById('sc1Budget').textContent = "$" + Math.max(0, Math.floor(gameState.budget)).toLocaleString();
+      document.getElementById('sc1Fuel').textContent = Math.floor(gameState.fuel) + "%";
+      document.getElementById('sc1Integrity').textContent = Math.floor(gameState.integrity) + "%";
+      document.getElementById('sc1Time').textContent = Math.ceil(gameState.timeElapsed) + " ثانية";
+
       const modal = document.getElementById('feedbackModal');
       modal.style.display = 'flex';
       modal.classList.remove('hidden');
@@ -1284,9 +1195,18 @@
         timestamp: new Date().toISOString()
       };
     
-      const allFeedbacks = JSON.parse(localStorage.getItem('offshore_admin_feedbacks_list') || '[]');
-      allFeedbacks.push(payload);
-      localStorage.setItem('offshore_admin_feedbacks_list', JSON.stringify(allFeedbacks));
+      // حفظ الاقتراح سحابياً في جدول feedbacks في Neon
+      if (window.neonSql) {
+        try {
+          await window.neonSql`
+            INSERT INTO feedbacks (name, phone, governorate, scenario, feedback)
+            VALUES (${payload.name}, ${payload.phone}, ${payload.governorate}, ${payload.scenario}, ${payload.feedback})
+          `;
+          console.log("تم حفظ الاقتراح في سيرفر Neon بنجاح!");
+        } catch(err) {
+          console.error("Neon Feedback Error:", err);
+        }
+      }
 
       document.getElementById('feedbackModal').style.display = 'none';
       document.getElementById('feedbackModal').classList.add('hidden');
@@ -1301,7 +1221,7 @@
     }
 
     /* =========================================================================
-       نظام لوحة المدير وسجل البيانات وتصدير Excel المضمون
+       لوحة المدير وتصدير الإكسل المنسق وإدارة السجلات في Neon
        ========================================================================= */
     const ADMIN_SECRET_KEY = "RigAdmin#2026@Sy";
     let adminClickCount = 0;
@@ -1363,46 +1283,44 @@
       }
     }
 
-// دالة حذف طالب من سيرفر Neon
+    // دالة حذف طالب من سيرفر Neon
     async function deletePlayerRecord(id) {
-      if (!confirm("هل أنت متأكد من حذف هذا السجل التجريبي نهائياً؟")) return;
+      if (!confirm("هل أنت متأكد من حذف هذا السجل نهائياً من قاعدة بيانات Neon؟")) return;
       if (window.neonSql && id) {
         try {
           await window.neonSql`DELETE FROM players WHERE id = ${id}`;
-          console.log("تم حذف السجل من Neon");
+          console.log("تم حذف الطالب من Neon");
         } catch (err) {
-          console.error("فشل الحذف:", err);
-        }
-      }
-      renderAdminDashboard(); // إعادة تحميل الجدول فوراً
-    }
-
-    // دالة حذف اقتراح من سيرفر Neon
-    async function deleteFeedbackRecord(id) {
-      if (!confirm("هل أنت متأكد من حذف هذا الاقتراح؟")) return;
-      if (window.neonSql && id) {
-        try {
-          await window.neonSql`DELETE FROM feedbacks WHERE id = ${id}`;
-        } catch (err) {
-          console.error("فشل الحذف:", err);
+          console.error("فشل الحذف من Neon:", err);
         }
       }
       renderAdminDashboard();
     }
 
+    // دالة حذف اقتراح من سيرفر Neon
+    async function deleteFeedbackRecord(id) {
+      if (!confirm("هل أنت متأكد من حذف هذا الاقتراح نهائياً؟")) return;
+      if (window.neonSql && id) {
+        try {
+          await window.neonSql`DELETE FROM feedbacks WHERE id = ${id}`;
+        } catch (err) {
+          console.error("فشل الحذف من Neon:", err);
+        }
+      }
+      renderAdminDashboard();
+    }
 
     async function renderAdminDashboard() {
       let users = [];
       let feedbacks = [];
 
-      // سحب بيانات جميع الطلاب من قاعدة بيانات Neon السحابية
+      // جلب السجلات الحية من قاعدة بيانات Neon السحابية
       if (window.neonSql) {
         try {
           users = await window.neonSql`SELECT * FROM players ORDER BY id DESC`;
           feedbacks = await window.neonSql`SELECT * FROM feedbacks ORDER BY id DESC`;
         } catch (err) {
           console.error("خطأ في جلب بيانات Neon:", err);
-          // في حال انقطاع النت يتم الاعتماد على السجل المحلي
           users = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
           feedbacks = JSON.parse(localStorage.getItem('offshore_admin_feedbacks_list') || '[]');
         }
@@ -1416,7 +1334,7 @@
 
       const uTbody = document.getElementById('adminUsersTbody');
       if (users.length === 0) {
-        uTbody.innerHTML = '<tr><td colspan="19" style="padding: 20px;">لا توجد بيانات مسجلة حتى الآن.</td></tr>';
+        uTbody.innerHTML = '<tr><td colspan="20" style="padding: 20px;">لا توجد بيانات مسجلة حتى الآن على سيرفر Neon.</td></tr>';
       } else {
         uTbody.innerHTML = users.map((u, i) => `
           <tr>
@@ -1451,7 +1369,7 @@
 
       const fTbody = document.getElementById('adminFeedbackTbody');
       if (feedbacks.length === 0) {
-        fTbody.innerHTML = '<tr><td colspan="7" style="padding: 20px;">لا توجد اقتراحات مسجلة بعد.</td></tr>';
+        fTbody.innerHTML = '<tr><td colspan="8" style="padding: 20px;">لا توجد اقتراحات مسجلة بعد على سيرفر Neon.</td></tr>';
       } else {
         fTbody.innerHTML = feedbacks.map((f, i) => `
           <tr>
@@ -1462,24 +1380,31 @@
             <td>${f.governorate}</td>
             <td>المستوى ${f.scenario || 1}</td>
             <td style="text-align:right; max-width:300px; white-space:normal;">${f.feedback}</td>
+            <td>
+              <button type="button" onclick="deleteFeedbackRecord(${f.id})" 
+                      style="background:#ff3344; border:none; color:#fff; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:0.75rem;">
+                🗑️ حذف
+              </button>
+            </td>
           </tr>
         `).join('');
       }
     }
 
-    function generateCSVContent() {
-      const users = JSON.parse(localStorage.getItem('offshore_admin_users_list') || '[]');
-      if (users.length === 0) return null;
-
-      let csv = "\uFEFF";
-      csv += "الرقم,التاريخ,الاسم,الهاتف,المواليد,المحافظة,المنطقة,العمل بالاختصاص,الجامعة,التخصص,المستوى,سنة التخرج,تدريب سابق,مكان التدريب,مانع السفر,أمان التدريب,التدريبات المطلوبة,الشهادات,البرمجيات\n";
-
-      users.forEach((u, i) => {
-        csv += `"${i+1}","${new Date(u.timestamp).toLocaleString('ar-SY')}","${u.name}","${u.phone}","${u.birthYear}","${u.governorate}","${u.area}","${u.workStatus}","${u.university}","${u.major}","${u.academicLevel}","${u.gradYear}","${u.hasTrained}","${u.trainingLocation}","${u.travelObstacle}","${u.safetyPerception}","${u.futureTraining}","${u.certifications}","${u.software}"\n`;
-      });
-      return csv;
+    function showAdminNotice(msg) {
+      let box = document.getElementById('adminNoticeBox');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'adminNoticeBox';
+        const card = document.querySelector('.admin-card');
+        if (card) card.insertBefore(box, card.children);
+      }
+      box.style.cssText = "background: #162a45; border: 1px solid #00d2ff; color: #fff; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin: 10px 0; text-align: center;";
+      box.style.display = 'block';
+      box.textContent = msg;
     }
 
+    // دالة تصدير ملف الإكسل المنسق هندسياً والمضمون
     async function exportAdminDataToExcel() {
       const rows = document.querySelectorAll('#adminUsersTbody tr');
       if (!rows || rows.length === 0 || rows[0].innerText.includes('لا توجد بيانات')) {
@@ -1487,7 +1412,6 @@
         return;
       }
 
-      // 1. استخراج عناوين الأعمدة
       const thElements = Array.from(document.querySelectorAll('#adminUsersView table thead th'));
       const headers = [];
       thElements.forEach(th => {
@@ -1497,7 +1421,6 @@
         }
       });
 
-      // 2. بناء كود جدول الإكسل المنسق بالكامل مع دعم العربية والاتجاه من اليمين لليسار
       let excelHTML = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -1538,7 +1461,7 @@
 
       excelHTML += `</tbody></table></body></html>`;
 
-      // 3. إرسال المحتوى لبايثون لحفظه كملف .xls وفتحه فوراً
+      // 1. التصدير المباشر عبر بايثون لسطح المكتب
       if (window.pywebview && window.pywebview.api && window.pywebview.api.save_to_excel) {
         try {
           await window.pywebview.api.save_to_excel(excelHTML);
@@ -1547,58 +1470,44 @@
         } catch(err) {}
       }
 
-      // متصفح عادي
-      const blob = new Blob([excelHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `سجل_المهندسين.xls`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
-      showAdminNotice('✅ تم تنزيل ملف Excel منسق بنجاح!');
-    }
-    
-    // دالة إظهار رسائل التنبيه داخل لوحة المدير مباشرة بدون alert المحجوبة
-    function showAdminNotice(msg) {
-      let box = document.getElementById('adminNoticeBox');
-      if (!box) {
-        box = document.createElement('div');
-        box.id = 'adminNoticeBox';
-        box.style.cssText = "background: #162a45; border: 1px solid #00d2ff; color: #fff; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin: 10px 0; text-align: center;";
-        const card = document.querySelector('.admin-card');
-        if (card) card.insertBefore(box, card.children);
+      // 2. التصدير عبر المتصفح العادي
+      try {
+        const blob = new Blob([excelHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `سجل_المهندسين.xls`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+        showAdminNotice('✅ تم تنزيل ملف Excel منسق بنجاح!');
+      } catch(e) {
+        showAdminNotice('يرجى استخدام زر التصدير من داخل برنامج اللعبة.');
       }
-      box.style.display = 'block';
-      box.textContent = msg;
-    }
-
-    function copyAdminDataToClipboard() {
-      const csv = generateCSVContent();
-      if (!csv) {
-        alert('لا توجد بيانات مسجلة لنسخها.');
-        return;
-      }
-      navigator.clipboard.writeText(csv).then(() => {
-        alert('📋 تم نسخ كامل سجل البيانات بنجاح!\n\nيمكنك الآن فتح برنامج Excel والضغط على (Ctrl + V) لتنزيل الجدول مباشرة.');
-      }).catch(err => {
-        alert('يرجى تحديد البيانات ونسخها يدوياً.');
-      });
     }
 
     /* =========================================================================
-       فيزياء ومحاكاة اللعبة الهندسية
+       محرك فيزياء اللعبة والتحديات الهندسية الحصرية لكل مستوى
        ========================================================================= */
     const GAME_CONFIG = {
-      budgetRatePerSec: 1200, autoDPFuelRate: 0.12, manualThrustForce: 1.2, friction: 0.96, maxSafeDrift: 18.0, criticalTilt: 28.0
+      budgetRatePerSec: 1200, autoDPFuelRate: 0.12, manualThrustForce: 1.2, friction: 0.96, maxSafeDrift: 3.5, criticalTilt: 28.0
     };
 
     let gameState = {
       isStarted: false,
       scenario: 1, phase: 1, budget: 5000000, fuel: 100, integrity: 100, timeLeft: 180,
       rigPos: { x: 0, z: 0 }, rigVel: { x: 0, z: 0 }, thrust: { x: 0, z: 0 }, autoDP: false,
-      windVector: { x: 0.04, z: 0.03, speedKnots: 8 }, waveHeight: 0.8, tilt: 0, cameraViewIndex: 0,
-      isNight: false, gameOver: false, isPaused: false, craneLowerProgress: 0, deckInstallProgress: 0, pipesProgress: 0
+      windVector: { x: 0.02, z: 0.015, speedKnots: 8 }, waveHeight: 0.6, tilt: 0, cameraViewIndex: 0,
+      isNight: false, gameOver: false, isPaused: false, craneLowerProgress: 0, deckInstallProgress: 0, pipesProgress: 0,
+      
+      // متغيرات التحديات الهندسية الميدانية
+      activeEmergency: null,
+      emergencyTimer: 0,
+      ballastTrimProgress: 0,
+      squallTimeLeft: 0,
+      thrustersOnline: true,
+      tethers: { N: 50, S: 50, E: 50, W: 50 },
+      timeElapsed: 0
     };
 
     function initAudio() {}
@@ -1712,26 +1621,135 @@
 
     function applyThrust(dx, dz) {
       if (!gameState.isStarted) return;
-      gameState.thrust.x = dx * GAME_CONFIG.manualThrustForce;
-      gameState.thrust.z = dz * GAME_CONFIG.manualThrustForce;
+      const powerFactor = gameState.thrustersOnline ? 1.0 : 0.3;
+      gameState.thrust.x = dx * GAME_CONFIG.manualThrustForce * powerFactor;
+      gameState.thrust.z = dz * GAME_CONFIG.manualThrustForce * powerFactor;
     }
     function stopThrust() { gameState.thrust.x = 0; gameState.thrust.z = 0; }
 
     function toggleAutoDP() {
       if (!gameState.isStarted) return;
       if (gameState.fuel <= 0) { alert("نفد الوقود: لا يمكن تشغيل الـ DP الآلي!"); return; }
+      if (!gameState.thrustersOnline) { alert("تحذير: القاطع الكهربائي مفصول! أعد ضبط القاطع أولاً."); return; }
       gameState.autoDP = !gameState.autoDP;
+    }
+
+    function triggerEmergency(type, title, desc, btnText, durationSec) {
+      gameState.activeEmergency = type;
+      gameState.emergencyTimer = durationSec;
+      
+      const banner = document.getElementById('emergencyBanner');
+      document.getElementById('emergencyTitle').textContent = title;
+      document.getElementById('emergencyDesc').textContent = desc;
+      document.getElementById('emergencyActionBtn').textContent = btnText;
+      document.getElementById('emergencyTimer').textContent = Math.ceil(durationSec) + "s";
+      
+      banner.style.display = 'flex';
+      banner.classList.remove('hidden');
+    }
+
+    function hideEmergencyBanner() {
+      gameState.activeEmergency = null;
+      const banner = document.getElementById('emergencyBanner');
+      banner.style.display = 'none';
+      banner.classList.add('hidden');
+    }
+
+    function resolveCurrentEmergency() {
+      if (gameState.activeEmergency === 'ballast') {
+        gameState.ballastTrimProgress = 1;
+        hideEmergencyBanner();
+      } else if (gameState.activeEmergency === 'thruster_trip') {
+        gameState.thrustersOnline = true;
+        hideEmergencyBanner();
+      }
+    }
+
+    function adjustTether(tetherId, delta) {
+      if (gameState.scenario !== 2) return;
+      gameState.tethers[tetherId] = Math.max(10, Math.min(100, gameState.tethers[tetherId] + delta));
+      document.getElementById('barTether' + tetherId).style.width = gameState.tethers[tetherId] + "%";
     }
 
     function updatePhysics(dt) {
       if (!gameState.isStarted || gameState.gameOver || gameState.isPaused) return;
 
       const clampedDt = Math.min(dt, 0.05);
+      gameState.timeElapsed += clampedDt;
       gameState.budget -= GAME_CONFIG.budgetRatePerSec * clampedDt;
       gameState.timeLeft -= clampedDt;
 
       if (gameState.timeLeft <= 0) { triggerGameOver(false, "انتهت نافذة الطقس المتاحة قبل اكتمال التشييد!"); return; }
       if (gameState.budget <= 0) { triggerGameOver(false, "تجاوز المشروع الميزانية المخصصة وتوقفت العمليات!"); return; }
+
+      // ----------------------------------------------------
+      // التحديات الحصرية الخاصة بالمستوى 1 (GBS): موازنة صهاريج الغمر
+      // ----------------------------------------------------
+      if (gameState.scenario === 1 && gameState.phase === 2) {
+        if (gameState.craneLowerProgress > 0.35 && gameState.ballastTrimProgress === 0 && !gameState.activeEmergency) {
+          triggerEmergency('ballast', '⚠️ عدم اتزان صهاريج الغمر (Ballast Imbalance)!', 'اختلال مياه الموازنة يرفع زاوية الميلان خطراً. اضغط لتشغيل مضخات الموازنة قبل تصدع القاعدة!', '⚖️ تشغيل مضخات الموازنة (Trim Pumps)', 8.0);
+        }
+      }
+
+      // ----------------------------------------------------
+      // التحديات الحصرية الخاصة بالمستوى 2 (TLP): هبوب الرياح ومعايرة الأوتار
+      // ----------------------------------------------------
+      if (gameState.scenario === 2) {
+        if (Math.floor(gameState.timeElapsed) % 24 === 0 && gameState.squallTimeLeft <= 0 && gameState.timeElapsed > 5) {
+          gameState.squallTimeLeft = 6.0;
+          gameState.windVector = { x: (Math.random() - 0.5) * 0.16, z: (Math.random() - 0.5) * 0.16, speedKnots: 36 };
+          document.getElementById('valWind').textContent = "36 kts (GUST)";
+        }
+        if (gameState.squallTimeLeft > 0) {
+          gameState.squallTimeLeft -= clampedDt;
+          if (gameState.squallTimeLeft <= 0) {
+            gameState.windVector = { x: -0.05, z: 0.04, speedKnots: 20 };
+            document.getElementById('valWind').textContent = "20 kts (NW)";
+          }
+        }
+
+        if (gameState.phase === 4) {
+          gameState.tethers.N += (Math.random() - 0.5) * 0.3;
+          gameState.tethers.S += (Math.random() - 0.5) * 0.3;
+          gameState.tethers.E += (Math.random() - 0.5) * 0.3;
+          gameState.tethers.W += (Math.random() - 0.5) * 0.3;
+          
+          for (let key of ['N', 'S', 'E', 'W']) {
+            document.getElementById('barTether' + key).style.width = gameState.tethers[key] + "%";
+            if (gameState.tethers[key] >= 92) {
+              triggerGameOver(false, `كارثة بحرية! انقطع الوتر (${key}) بسبب فرط الشد الزائد مما أدى إلى انقلاب المنصة!`);
+              return;
+            } else if (gameState.tethers[key] <= 18) {
+              triggerGameOver(false, `فقدان السيطرة! ارتخى الوتر (${key}) بشكل حرج وفقدت المنصة استقرارها الرأسي.`);
+              return;
+            }
+          }
+        }
+      }
+
+      // ----------------------------------------------------
+      // التحديات الحصرية الخاصة بالمستوى 3 (Atlantic): أعطال الدوافع وخطر كسر ذراع الحفر
+      // ----------------------------------------------------
+      if (gameState.scenario === 3) {
+        if (gameState.phase === 2 && gameState.craneLowerProgress > 0.4 && gameState.thrustersOnline && !gameState.activeEmergency && Math.random() < 0.008) {
+          gameState.thrustersOnline = false;
+          triggerEmergency('thruster_trip', '⚡ عطل كهربائي: انقطاع الطاقة عن الدافع الرئيسي #2!', 'انفصل القاطع وانخفضت قوة الدوافع بنسبة 70%. اضغط لإعادة الضبط قبل الانجراف الكارثي!', '⚡ إعادة ضبط القاطع (Reset Breaker)', 7.0);
+        }
+        gameState.waveHeight = Math.min(3.5, 2.6 + (gameState.timeElapsed * 0.005));
+      }
+
+      if (gameState.activeEmergency) {
+        gameState.emergencyTimer -= clampedDt;
+        document.getElementById('emergencyTimer').textContent = Math.ceil(gameState.emergencyTimer) + "s";
+        if (gameState.emergencyTimer <= 0) {
+          if (gameState.activeEmergency === 'ballast') {
+            triggerGameOver(false, "فشلت المهمة! انغرست إحدى زوايا القاعدة الخرسانية في الرمل بسبب اختلال صهاريج الغمر وتصدع الهيكل.");
+          } else if (gameState.activeEmergency === 'thruster_trip') {
+            triggerGameOver(false, "كارثة بحرية! جرفت العاصفة سفينة الحفر بعيداً وانكسرت وصلة رأس البئر.");
+          }
+          return;
+        }
+      }
 
       const driftX = gameState.windVector.x * (gameState.waveHeight * 0.45);
       const driftZ = gameState.windVector.z * (gameState.waveHeight * 0.45);
@@ -1767,8 +1785,18 @@
       const wavePitch = Math.cos(t * 0.9) * (gameState.waveHeight * 1.0);
       gameState.tilt = Math.abs(waveRoll) + Math.abs(Math.sqrt(gameState.rigVel.x**2 + gameState.rigVel.z**2) * 0.5);
 
+      if (gameState.activeEmergency === 'ballast') {
+        gameState.tilt += 4.5;
+      }
+
       if (totalDrift > GAME_CONFIG.maxSafeDrift) {
-        gameState.integrity = Math.max(0, gameState.integrity - (totalDrift - GAME_CONFIG.maxSafeDrift) * 0.4 * clampedDt);
+        gameState.integrity = Math.max(0, gameState.integrity - (totalDrift - GAME_CONFIG.maxSafeDrift) * 0.5 * clampedDt);
+      }
+
+      // في المستوى 3: زاوية الميلان الحرجة 10 درجات فقط لحماية ذراع الحفر (Riser)
+      if (gameState.scenario === 3 && gameState.tilt >= 10.0) {
+        triggerGameOver(false, "كارثة بيئية! تجاوزت زاوية الميلان 10 درجات مما أدى إلى قص وكسر أنبوب الحفر (Drill Riser Shear) وتسرب النفط!");
+        return;
       }
 
       if (gameState.tilt >= GAME_CONFIG.criticalTilt || gameState.integrity <= 0) {
@@ -1843,7 +1871,7 @@
       blip.style.top = Math.min(95, Math.max(5, 50 + (gameState.rigPos.z / 18) * 45)) + "%";
 
       const dpStatus = document.getElementById('dpStatusText');
-      if (driftDist < 5) { dpStatus.textContent = "محاذاة ممتازة (Green)"; dpStatus.style.color = "var(--accent-green)"; }
+      if (driftDist < (GAME_CONFIG.maxSafeDrift * 0.6)) { dpStatus.textContent = "محاذاة ممتازة (Green)"; dpStatus.style.color = "var(--accent-green)"; }
       else if (driftDist < GAME_CONFIG.maxSafeDrift) { dpStatus.textContent = "انحراف طفيف (Yellow)"; dpStatus.style.color = "var(--accent-warn)"; }
       else { dpStatus.textContent = "خطر: تجاوز دائرة الأمان!"; dpStatus.style.color = "var(--accent-danger)"; }
     }
@@ -1852,8 +1880,12 @@
       if (!gameState.isStarted) return;
       const btn = document.getElementById('btnMainAction');
       const drift = Math.sqrt(gameState.rigPos.x ** 2 + gameState.rigPos.z ** 2);
+      
       if (gameState.phase === 1) {
-        if (drift > 6.0) { alert("تنبيه أمان: حافظ على استقرار المنصة داخل دائرة الأمان (< 6م) قبل بدء الإنزال!"); return; }
+        if (drift > GAME_CONFIG.maxSafeDrift) {
+          alert(`تنبيه هندسي: في هذا المستوى لا يمكن بدء الإنزال حتى يكون الانحراف أقل من ${GAME_CONFIG.maxSafeDrift}م! اضبط التموضع أولاً.`);
+          return;
+        }
         btn.disabled = true; btn.innerHTML = `<span>⏳ جاري إنزال ونش القاعدة البحرية...</span>`; advancePhase(2);
       }
     }
@@ -1871,73 +1903,94 @@
       const instruction = document.getElementById('phaseInstruction');
 
       if (nextPhase === 2) {
-        instruction.textContent = "⚙️ جاري تشغيل ونش الرافعة البحرية لإنزال القاعدة الخرسانية. حافظ على ثبات الـ DP لتفادي الانحراف.";
+        instruction.textContent = "⚙️ جاري تشغيل ونش الرافعة البحرية لإنزال القاعدة. حافظ على استقرار التموضع وتفادَ اختلال الصهاريج.";
       } else if (nextPhase === 3) {
         btn.disabled = false; btn.innerHTML = `<span>رفع وتثبيت السطح العلوي (Topsides)</span>`;
-        instruction.textContent = "🏗️ استقرت القاعدة في قاع البحر! اضغط لرفع السطح الرئيسي وتثبيت برج الحفر.";
+        instruction.textContent = "🏗️ استقرت القاعدة في قاع البحر! اضغط لرفع وتجميع السطح وبرج الحفر.";
       } else if (nextPhase === 4) {
         btn.disabled = false; btn.innerHTML = `<span>معايرة كابلات الشد وربط الأنابيب</span>`;
-        instruction.textContent = "🔗 تم تثبيت السطح العلوي! المرحلة الأخيرة: شد أوتار التثبيت وبدء خط التدفق.";
+        instruction.textContent = "🔗 تم تثبيت السطح! المرحلة الأخيرة: معايرة شد أوتار التثبيت وبدء خط التدفق.";
+        if (gameState.scenario === 2) {
+          document.getElementById('tetherHud').classList.remove('hidden');
+        }
       } else if (nextPhase === 5) {
+        if (gameState.scenario === 2) {
+          document.getElementById('tetherHud').classList.add('hidden');
+        }
         triggerVictory();
       }
     }
 
     function startScenario(id) {
-      gameState.isStarted = true;
+    gameState.isStarted = true;
       gameState.scenario = id;
       gameState.phase = 1;
+      gameState.timeElapsed = 0;
       gameState.craneLowerProgress = 0;
       gameState.deckInstallProgress = 0;
       gameState.pipesProgress = 0;
       gameState.budget = 5000000;
       gameState.fuel = 100;
       gameState.integrity = 100;
-      gameState.timeLeft = 180;
       gameState.gameOver = false;
       gameState.autoDP = false;
       gameState.rigPos = { x: 0, z: 0 };
       gameState.rigVel = { x: 0, z: 0 };
       gameState.tilt = 0;
-
-      const modal = document.getElementById('gameModal');
-      modal.style.display = 'none';
-      modal.classList.add('hidden');
-
-      const badge = document.getElementById('scenarioBadge');
-
-      if (id === 1) {
+    if (id === 1) {
         badge.textContent = "المستوى 1: المياه الضحلة (GBS)";
-        gameState.waveHeight = 0.6; gameState.windVector = { x: 0.02, z: 0.015, speedKnots: 8 };
-        document.getElementById('valWind').textContent = "8 kts (NNE)";
+        GAME_CONFIG.maxSafeDrift = 3.5;
+        GAME_CONFIG.criticalTilt = 20.0;
+        GAME_CONFIG.manualThrustForce = 1.3;
+        GAME_CONFIG.friction = 0.985; // احتكاك خفيف يسمح بالقصور الذاتي
+        GAME_CONFIG.autoDPFuelRate = 0.18;
+        GAME_CONFIG.budgetRatePerSec = 10000;
+        gameState.timeLeft = 120; // دقيقتان فقط
+        gameState.waveHeight = 0.8; 
+        gameState.windVector = { x: 0.035, z: 0.025, speedKnots: 12 };
+        document.getElementById('valWind').textContent = "12 kts (NNE)";
+        document.getElementById('step1Desc').textContent = "تثبيت المنصة في دائرة الأمان < 3.5م";
         scene.background = new THREE.Color(0x0a2240); scene.fog = new THREE.FogExp2(0x0a2240, 0.006);
         rainParticles.visible = false; ambientLight.intensity = 1.3;
       } else if (id === 2) {
         badge.textContent = "المستوى 2: بحر الشمال (TLP)";
-        gameState.waveHeight = 1.6; gameState.windVector = { x: -0.05, z: 0.04, speedKnots: 20 };
-        document.getElementById('valWind').textContent = "20 kts (NW)";
+        GAME_CONFIG.maxSafeDrift = 6.0;
+        GAME_CONFIG.criticalTilt = 16.0;
+        GAME_CONFIG.manualThrustForce = 1.5;
+        GAME_CONFIG.friction = 0.99; // قصور ذاتي عالٍ يتطلب دفعاً عكسياً لإيقاف المنصة
+        GAME_CONFIG.autoDPFuelRate = 0.45; // استنزاف وقود سريع جداً للـ DP الآلي
+        GAME_CONFIG.budgetRatePerSec = 16000;
+        gameState.timeLeft = 100;
+        gameState.waveHeight = 2.2; 
+        gameState.windVector = { x: -0.09, z: 0.07, speedKnots: 28 };
+        document.getElementById('valWind').textContent = "28 kts (NW)";
+        document.getElementById('step1Desc').textContent = "مقاومة التيارات العاتية والانجراف < 6.0م";
         scene.background = new THREE.Color(0x111c2a); scene.fog = new THREE.FogExp2(0x111c2a, 0.006);
         rainParticles.visible = true; ambientLight.intensity = 0.9;
       } else if (id === 3) {
         badge.textContent = "المستوى 3: المياه فائقة العمق (Atlantic Storm)";
-        gameState.waveHeight = 2.6; gameState.windVector = { x: 0.08, z: -0.06, speedKnots: 32 };
-        document.getElementById('valWind').textContent = "32 kts (ESE)";
+        GAME_CONFIG.maxSafeDrift = 7.5;
+        GAME_CONFIG.criticalTilt = 8.5; // زاوية ميلان حرجة صارمة (خطر قص ذراع الحفر)
+        GAME_CONFIG.manualThrustForce = 1.7;
+        GAME_CONFIG.friction = 0.994; // قصور ذاتي مائي شديد وسط الأمواج العاتية
+        GAME_CONFIG.autoDPFuelRate = 0.55;
+        GAME_CONFIG.budgetRatePerSec = 25000;
+        gameState.timeLeft = 90; // دقيقة ونصف في سباق مع الإعصار
+        gameState.waveHeight = 3.4; 
+        gameState.windVector = { x: 0.14, z: -0.11, speedKnots: 45 };
+        document.getElementById('valWind').textContent = "45 kts (ESE GALE)";
+        document.getElementById('step1Desc').textContent = "خطر كسر ذراع الحفر عند ميلان > 8.5 درجات!";
         scene.background = new THREE.Color(0x050a12); scene.fog = new THREE.FogExp2(0x050a12, 0.006);
-        rainParticles.visible = true; ambientLight.intensity = 0.5;
+        rainParticles.visible = true; ambientLight.intensity = 0.45;
+        dirLight.color.setHex(0x335588); dirLight.intensity = 0.4;
       }
-
-      baseTemplateGroup.position.set(0, -5, 0); deckGroup.position.y = 35;
-      deckGroup.visible = false; pipeLinesGroup.visible = false;
-
-      for (let i = 1; i <= 4; i++) document.getElementById('step' + i).className = "phase-step " + (i === 1 ? "active" : "");
-      document.getElementById('phasePercent').textContent = "0%";
-      const btn = document.getElementById('btnMainAction');
-      btn.disabled = false; btn.innerHTML = `<span>بدء إنزال القاعدة البحرية</span>`;
     }
+
 
     function triggerGameOver(success, msg) {
       gameState.gameOver = true;
       gameState.isStarted = false;
+      hideEmergencyBanner();
       
       const modal = document.getElementById('gameModal');
       const card = document.getElementById('modalCard');
@@ -1948,7 +2001,32 @@
       if (success) {
         card.className = "modal-card victory";
         document.getElementById('modalTitle').textContent = "🎉 تم إنجاز التشييد والتثبيت بنجاح!";
-        document.getElementById('modalDesc').textContent = msg;
+        
+        let rankStars = "⭐⭐ B";
+        let rankTitle = "مساعد مهندس ميداني (Junior Field Engineer)";
+        if (gameState.budget > 3500000 && gameState.integrity >= 80 && gameState.fuel >= 30) {
+          rankStars = "⭐⭐⭐ A+";
+          rankTitle = "مهندس استشاري بحري أول (Master Offshore Superintendent)";
+        } else if (gameState.budget > 2200000 && gameState.integrity >= 65) {
+          rankStars = "⭐⭐ A";
+          rankTitle = "مهندس عمليات بحرية متمرس (Field Operations Engineer)";
+        }
+
+        const scoreHTML = `
+          <div class="scorecard-box">
+            <div class="score-rank-stars">${rankStars}</div>
+            <div class="score-rank-title">${rankTitle}</div>
+            <div style="font-size:0.8rem; color:#cbd5e1; margin-bottom:8px;">${msg}</div>
+            <div class="score-grid">
+              <div class="score-item">الميزانية المحفوظة: <span>$${Math.floor(gameState.budget).toLocaleString()}</span></div>
+              <div class="score-item">الوقود المتبقي: <span>${Math.floor(gameState.fuel)}%</span></div>
+              <div class="score-item">سلامة الهيكل: <span>${Math.floor(gameState.integrity)}%</span></div>
+              <div class="score-item">زمن الإنجاز: <span>${Math.ceil(gameState.timeElapsed)} ثانية</span></div>
+            </div>
+          </div>
+        `;
+        document.getElementById('modalDesc').innerHTML = scoreHTML;
+
         actionBtn.textContent = "الانتقال للمستوى التالي";
         actionBtn.onclick = () => { if (gameState.scenario < 3) openLevelBriefing(gameState.scenario + 1); else openLevelBriefing(1); };
       } else {
@@ -1967,7 +2045,7 @@
       if (gameState.scenario === 1) {
         showLevel1FeedbackModal();
       } else {
-        triggerGameOver(true, `تم تثبيت منصة الحفر وتشغيل الأنابيب بنجاح! الميزانية المتبقية: $${Math.floor(gameState.budget).toLocaleString()} | سلامة الهيكل: ${Math.floor(gameState.integrity)}%`);
+        triggerGameOver(true, "تم تثبيت المنصة وتشغيل منظومة التدفق والسيطرة بنجاح تحت المعايير الهندسية الدولية.");
       }
     }
 
@@ -1995,7 +2073,7 @@
     function setupCameraMouseControls() {
       let isDragging = false, prevMousePos = { x: 0, y: 0 };
       window.addEventListener('mousedown', (e) => {
-        if (e.target.closest('.interactive') || e.target.closest('.modal-card') || e.target.closest('#adminSecretTrigger') || e.target.closest('.card-admin-hotspot')) return;
+        if (e.target.closest('.interactive') || e.target.closest('.modal-card') || e.target.closest('#adminSecretTrigger') || e.target.closest('.card-admin-hotspot') || e.target.closest('.emergency-alert-banner')) return;
         isDragging = true; prevMousePos = { x: e.clientX, y: e.clientY };
       });
       window.addEventListener('mousemove', (e) => {
@@ -2028,62 +2106,6 @@
       animate();
       checkUserRegistration();
     };
-
-    const DRIVE_UPDATE_URL = "https://drive.google.com/file/d/1ENcpssCJdl_hIb0yvUWqHqSPRTtPNZgN/view?usp=sharing";
-
-    // فحص ذكي: إذا كان الشخص يفتح من النسخة القديمة التي لا تملك ميزة الإكسل، نظهر له نافذة التحديث فوراً
-    function checkAndShowUpdateModal() {
-      // النسخة القديمة لا تملك js_api save_to_excel في بايثون
-      const isRunningOldExe = window.pywebview && (!window.pywebview.api || !window.pywebview.api.save_to_excel);
-      
-      // إذا كان يفتح من النسخة القديمة ولم يقم بتخطي التنبيه في هذه الجلسة
-      if (isRunningOldExe && !sessionStorage.getItem('skip_update_notice')) {
-        const modal = document.getElementById('newVersionModal');
-        if (modal) {
-          modal.style.display = 'flex';
-          modal.classList.remove('hidden');
-        }
-      }
-    }
-
-    function openDriveDownload() {
-      window.open(DRIVE_UPDATE_URL, '_blank');
-    }
-
-    function closeUpdateNotice() {
-      sessionStorage.setItem('skip_update_notice', 'true');
-      const modal = document.getElementById('newVersionModal');
-      if (modal) {
-        modal.style.display = 'none';
-        modal.classList.add('hidden');
-      }
-    }
-
-    // تشغيل الفحص فور تحميل الصفحة
-    window.addEventListener('load', () => {
-      setTimeout(checkAndShowUpdateModal, 1200);
-    });
-
   </script>
-  <!-- نافذة إشعار التحديث التلقائي للمدير والطلاب -->
-  <div id="newVersionModal" class="modal-backdrop hidden" style="z-index: 100002;">
-    <div class="modal-card" style="width: 440px; border: 2px solid var(--accent-cyan);">
-      <div style="font-size: 2.5rem; margin-bottom: -6px;">🚀</div>
-      <h2 style="color: var(--accent-cyan); font-size: 1.25rem;">يتوفر تحديث جديد ورسمي للمحاكي!</h2>
-      <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.6; text-align: justify; background: rgba(16,28,45,0.7); padding: 12px; border-radius: 8px;">
-        تم إطلاق التحديث المعتمد (الإصدار 1.0.1) للمحاكي، ويتضمن:
-        <br>• ميزة تصدير سجل المهندسين كملف Excel منسق على سطح المكتب فوراً.
-        <br>• تثبيت تسجيل الدخول وحفظ السجلات بشكل دائم.
-      </p>
-      <div style="display: flex; gap: 10px; margin-top: 6px;">
-        <button type="button" class="btn-secondary" onclick="closeUpdateNotice()" style="flex: 1;">
-          تخطي ومتابعة اللعب
-        </button>
-        <button type="button" class="action-button" onclick="openDriveDownload()" style="flex: 1.4; background: linear-gradient(135deg, #00d2ff, #0088cc); color: #000; font-weight: bold;">
-          📥 تحميل التحديث الآن
-        </button>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
