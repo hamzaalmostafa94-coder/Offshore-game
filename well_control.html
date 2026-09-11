@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة محاكاة التحكم بالآبار المتقدمة | Offshore Well Control & BOP Simulator (IWCF / IADC Standard)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+  :root {
+    --bg-main: #06090e;
+    --bg-panel: #0d1117;
+    --bg-card: #161b22;
+    --bg-input: #010409;
+    --border-color: #30363d;
+    --border-highlight: #58a6ff;
+    --text-main: #c9d1d9;
+    --text-muted: #8b949e;
+    --text-bright: #f0f6fc;
+    --accent-blue: #58a6ff;
+    --accent-green: #2ea043;
+    --accent-yellow: #f0b429;
+    --accent-red: #f85149;
+    --accent-purple: #8957e5;
+    --gauge-bg: #090d13;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    direction: rtl;
+  }
+  #simulator-container {
+    width: 100%;
+    max-width: 1400px;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .title-group h1 {
+    font-size: 20px;
+    margin: 0;
+    color: var(--accent-yellow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-shadow: 0 0 12px rgba(240, 180, 41, 0.3);
+  }
+  .title-group p {
+    margin: 3px 0 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-audio, .btn-reset {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-bright);
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-audio:hover, .btn-reset:hover { background: #21262d; border-color: var(--border-highlight); }
+  .scenario-bar {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .scenario-selector-label {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--accent-blue);
+  }
+  .scenario-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .scenario-btn {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .scenario-btn.active {
+    background: #1f6feb;
+    color: white;
+    border-color: #388bfd;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(31, 111, 235, 0.5);
+  }
+  .status-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    background-color: #238636;
+    color: white;
+    transition: background 0.3s;
+  }
+  .status-banner.danger {
+    background-color: var(--accent-red);
+    animation: pulseAlert 1s infinite alternate;
+  }
+  @keyframes pulseAlert {
+    from { box-shadow: 0 0 5px rgba(248, 81, 73, 0.4); }
+    to { box-shadow: 0 0 20px rgba(248, 81, 73, 0.9); }
+  }
+  .timer-pill {
+    background: rgba(0,0,0,0.35);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-family: monospace;
+  }
+  .workspace-grid {
+    display: grid;
+    grid-template-columns: 340px 1fr 380px;
+    gap: 14px;
+  }
+  @media (max-width: 1200px) {
+    .workspace-grid { grid-template-columns: 1fr 1fr; }
+    .center-column { grid-column: span 2; }
+  }
+  @media (max-width: 800px) {
+    .workspace-grid { grid-template-columns: 1fr; }
+    .center-column { grid-column: span 1; }
+  }
+  .panel-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .panel-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--accent-blue);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .gauges-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .gauge-card {
+    background: var(--gauge-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+  }
+  .gauge-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+  .gauge-svg {
+    width: 90px;
+    height: 60px;
+  }
+  .gauge-value {
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--text-bright);
+    font-family: monospace;
+    margin-top: 2px;
+  }
+  .gauge-value.warning { color: var(--accent-yellow); }
+  .gauge-value.alarm { color: var(--accent-red); }
+  .gauge-unit { font-size: 10px; color: var(--text-muted); }
+  .readout-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--bg-input);
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+  .readout-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 3px 6px;
+    border-bottom: 1px solid #161b22;
+  }
+  .readout-item span:first-child { color: var(--text-muted); }
+  .readout-item strong { color: var(--accent-blue); font-family: monospace; }
+  .center-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #canvas-container {
+    width: 100%;
+    height: 460px;
+    background: radial-gradient(circle at center, #0e1e38 0%, #030812 85%);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+  }
+  #canvas-container:active { cursor: grabbing; }
+  .canvas-overlay-hints {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: rgba(13, 17, 23, 0.75);
+    border: 1px solid var(--border-color);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  .view-controls {
+    display: flex;
+    gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 6px 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .view-btn {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .view-btn:hover { background: #21262d; }
+  .view-btn.active { background: #1f6feb; color: white; border-color: #388bfd; }
+  .bop-console {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .accumulator-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+  }
+  .accum-block { font-size: 11px; }
+  .accum-val { font-size: 12px; font-weight: bold; color: var(--accent-green); font-family: monospace; }
+  .actuator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .bop-switch-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .bop-switch-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--text-bright);
+  }
+  .status-light {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .status-light.open { background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
+  .status-light.closed { background: var(--accent-red); box-shadow: 0 0 6px var(--accent-red); }
+  .bop-btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+  .bop-action-btn {
+    background: #21262d;
+    border: 1px solid var(--border-color);
+    color: var(--text-bright);
+    font-size: 11px;
+    padding: 6px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+  .bop-action-btn:hover { background: #30363d; }
+  .bop-action-btn.active-close { background: #da3633; border-color: #f85149; }
+  .bop-action-btn.active-open { background: #238636; border-color: #2ea043; }
+  .choke-box {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .choke-slider-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .choke-slider {
+    flex-grow: 1;
+    accent-color: var(--accent-yellow);
+    cursor: pointer;
+    height: 6px;
+  }
+  .choke-fine-btn {
+    background: #21262d;
+    border: 1px solid var(--border-color);
+    color: var(--text-bright);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .protocol-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .step-btn {
+    background: #161b22;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 9px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: right;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+  }
+  .step-btn:hover { background: #21262d; border-color: var(--accent-blue); }
+  .step-btn.completed {
+    background: rgba(46, 160, 67, 0.15);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+    font-weight: bold;
+  }
+  .shear-cover {
+    border: 2px dashed #8957e5;
+    border-radius: 8px;
+    padding: 8px;
+    background: rgba(137, 87, 229, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .btn-shear-ram {
+    background: var(--accent-purple);
+    color: white;
+    border: none;
+    padding: 9px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+    transition: 0.2s;
+  }
+  .btn-shear-ram:hover { background: #a371f7; }
+  #kill-sheet-module {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 16px;
+    display: none;
+  }
+  .killsheet-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 900px) {
+    .killsheet-grid { grid-template-columns: 1fr; }
+  }
+  .sheet-group {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sheet-group-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--accent-yellow);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+  }
+  .field-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+  .field-row input {
+    background: #0d1117;
+    border: 1px solid var(--border-color);
+    color: var(--accent-blue);
+    padding: 4px 8px;
+    border-radius: 4px;
+    width: 90px;
+    text-align: center;
+    font-weight: bold;
+    font-family: monospace;
+  }
+  .formula-box {
+    background: #090d13;
+    border-left: 3px solid var(--accent-blue);
+    padding: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    border-radius: 4px;
+  }
+  #assessment-modal {
+    display: none;
+    background: var(--bg-card);
+    border: 2px solid var(--accent-yellow);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    margin-top: 10px;
+  }
+  .score-badge {
+    font-size: 42px;
+    font-weight: bold;
+    margin: 10px 0;
+    font-family: monospace;
+  }
+  .criteria-list {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    background: var(--bg-input);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+  .hint-box {
+    background: rgba(31, 111, 235, 0.12);
+    border: 1px solid #1f6feb;
+    color: #79c0ff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+</style>
+</head>
+<body>
+<div id="simulator-container">
+  <div class="top-header">
+    <div class="title-group">
+      <h1>🛢️ منصة محاكاة السيطرة على الآبار والتحكم بموانع الانفجار (IWCF / IADC WellSharp)</h1>
+      <p>محاكاة متكاملة لحسابات الضغوط الهيدروليكية، كونسول الحفار، مانع الاندفاع البحري (3D Subsea/Surface BOP)، ومنهجية قتل البئر</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-audio" id="audio-toggle-btn" onclick="toggleAudio()">🔊 تشغيل الصوت</button>
+      <button class="btn-reset" onclick="resetSimulator()">🔄 إعادة ضبط المنصة</button>
+    </div>
+  </div>
+  <div class="scenario-bar">
+    <span class="scenario-selector-label">🎯 اختر السيناريو التدريبي:</span>
+    <div class="scenario-buttons">
+      <button class="scenario-btn active" id="sc-btn-1" onclick="selectScenario(1)">1. ركلة أثناء الحفر (Soft Shut-in)</button>
+      <button class="scenario-btn" id="sc-btn-2" onclick="selectScenario(2)">2. ركلة أثناء السحب (Tripping & Swab)</button>
+      <button class="scenario-btn" id="sc-btn-3" onclick="selectScenario(3)">3. غاز سطحي ومحوّل (Shallow Gas Diverter)</button>
+      <button class="scenario-btn" id="sc-btn-4" onclick="selectScenario(4)">4. الإغلاق الصلب والناعم (Hard vs Soft)</button>
+      <button class="scenario-btn" id="sc-btn-5" onclick="selectScenario(5)">5. فقدان سائل الحفر وتدفق مزدوج (Lost Circulation)</button>
+    </div>
+  </div>
+  <div class="status-banner" id="status-banner">
+    <div id="status-text">✅ حالة البئر: عمليات الحفر مستقرة - الضغط الهيدروستاتيكي متوازن</div>
+    <div class="timer-pill" id="timer-display">⏱️ الاستقرار: 00:00</div>
+  </div>
+  <div class="workspace-grid">
+    <div class="panel-box">
+      <div class="panel-title">
+        <span>📊 كونسول الحفار (Driller's Gauges)</span>
+        <span style="font-size:10px; color:var(--accent-yellow)">API / IADC STANDARD</span>
+      </div>
+      <div class="gauges-grid">
+        <div class="gauge-card">
+          <div class="gauge-label">ضغط المضخة (SPP)</div>
+          <svg class="gauge-svg" id="spp-gauge-svg" viewBox="0 0 100 65"></svg>
+          <div class="gauge-value" id="spp-val">2,200</div>
+          <div class="gauge-unit">psi</div>
+        </div>
+        <div class="gauge-card">
+          <div class="gauge-label">ضغط المواسير (SIDPP)</div>
+          <svg class="gauge-svg" id="sidpp-gauge-svg" viewBox="0 0 100 65"></svg>
+          <div class="gauge-value" id="sidpp-val">0</div>
+          <div class="gauge-unit">psi</div>
+        </div>
+        <div class="gauge-card">
+          <div class="gauge-label">ضغط الفراغ الحلقي (SICP)</div>
+          <svg class="gauge-svg" id="sicp-gauge-svg" viewBox="0 0 100 65"></svg>
+          <div class="gauge-value" id="sicp-val">0</div>
+          <div class="gauge-unit">psi</div>
+        </div>
+        <div class="gauge-card">
+          <div class="gauge-label">معدل رجوع الطين (Flow %)</div>
+          <svg class="gauge-svg" id="flow-gauge-svg" viewBox="0 0 100 65"></svg>
+          <div class="gauge-value" id="flow-val">50%</div>
+          <div class="gauge-unit">Paddle Sensor</div>
+        </div>
+      </div>
+      <div class="readout-list">
+        <div class="readout-item">
+          <span>مستوى الخزانات (Pit Gain/Loss):</span>
+          <strong id="pit-gain-val">+0.0 bbl (500 bbl)</strong>
+        </div>
+        <div class="readout-item">
+          <span>خزان الرحلات (Trip Tank):</span>
+          <strong id="trip-tank-val">25.0 bbl (متطابق)</strong>
+        </div>
+        <div class="readout-item">
+          <span>سرعة مضخات الطين (Pumps SPM):</span>
+          <strong id="pumps-spm-val">90 SPM (Pump 1+2)</strong>
+        </div>
+        <div class="readout-item">
+          <span>وزن الطين الأولي (Original MW):</span>
+          <strong id="omw-val">10.2 ppg</strong>
+        </div>
+        <div class="readout-item">
+          <span>العمق العمودي الحقيقي (TVD):</span>
+          <strong id="tvd-val">10,000 ft</strong>
+        </div>
+        <div class="readout-item">
+          <span>ضغط الطبقات المقدر (Formation P):</span>
+          <strong id="form-p-val">5,304 psi</strong>
+        </div>
+      </div>
+      <div class="hint-box" id="driller-hint">
+        💡 راقب مؤشر التدفق (Flow Paddle) وزيادة مستوى الخزانات (Pit Gain) للكشف المبكر عن الركلة.
+      </div>
+    </div>
+    <div class="center-column">
+      <div class="view-controls">
+        <button class="view-btn active" id="view-mode-subsea" onclick="switchRigView('subsea')">🌊 منصة عائمة / BOP في قاع البحر</button>
+        <button class="view-btn" id="view-mode-surface" onclick="switchRigView('surface')">🏗️ منصة ثابتة / BOP سطحي</button>
+        <button class="view-btn" onclick="reset3DCamera()">🎥 إعادة توجيه الكاميرا</button>
+      </div>
+      <div id="canvas-container">
+        <div class="canvas-overlay-hints">
+          🖱️ تدوير: اسحب بالفأرة | 🔍 تكبير: عجلة الفأرة | ✋ إزاحة: زر أيمن
+        </div>
+      </div>
+      <div class="panel-box" style="padding: 10px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px;">
+          <span>💧 نظام دوران سائل الحفر: <strong id="circ-status" style="color:var(--accent-green)">دوران طبيعي (Normal Circulation)</strong></span>
+          <span>⚡ صدمة المطرقة الهيدروليكية: <strong id="hammer-status" style="color:var(--accent-green)">آمن (0 psi surge)</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="panel-box bop-console">
+      <div class="panel-title">
+        <span>🎮 لوحة التحكم الهيدروليكي بموانع الاندفاع (BOP Panel)</span>
+        <span style="font-size:10px; color:var(--accent-green)">KOOMEY UNIT ACTIVE</span>
+      </div>
+      <div class="accumulator-row">
+        <div class="accum-block">
+          <div>ضغط الزجاجات</div>
+          <div class="accum-val" id="accum-bottle-p">3,000 psi</div>
+        </div>
+        <div class="accum-block">
+          <div>المجمّع (Manifold)</div>
+          <div class="accum-val" id="accum-manifold-p">1,500 psi</div>
+        </div>
+        <div class="accum-block">
+          <div>المانع الحلقي</div>
+          <div class="accum-val" id="accum-annular-p">1,000 psi</div>
+        </div>
+      </div>
+      <div class="actuator-grid">
+        <div class="bop-switch-card">
+          <div class="bop-switch-header">
+            <span>المانع الحلقي (Annular)</span>
+            <span class="status-light open" id="light-annular"></span>
+          </div>
+          <div class="bop-btn-group">
+            <button class="bop-action-btn" id="btn-annular-close" onclick="toggleBOPElement('annular', true)">إغلاق</button>
+            <button class="bop-action-btn active-open" id="btn-annular-open" onclick="toggleBOPElement('annular', false)">فتح</button>
+          </div>
+        </div>
+        <div class="bop-switch-card">
+          <div class="bop-switch-header">
+            <span>مكابس الأنابيب (Pipe Rams)</span>
+            <span class="status-light open" id="light-piperam"></span>
+          </div>
+          <div class="bop-btn-group">
+            <button class="bop-action-btn" id="btn-piperam-close" onclick="toggleBOPElement('piperam', true)">إغلاق</button>
+            <button class="bop-action-btn active-open" id="btn-piperam-open" onclick="toggleBOPElement('piperam', false)">فتح</button>
+          </div>
+        </div>
+        <div class="bop-switch-card">
+          <div class="bop-switch-header">
+            <span>صمام خط الخنق (HCR)</span>
+            <span class="status-light closed" id="light-hcr"></span>
+          </div>
+          <div class="bop-btn-group">
+            <button class="bop-action-btn" id="btn-hcr-open" onclick="toggleBOPElement('hcr', true)">فتح</button>
+            <button class="bop-action-btn active-close" id="btn-hcr-close" onclick="toggleBOPElement('hcr', false)">إغلاق</button>
+          </div>
+        </div>
+        <div class="bop-switch-card">
+          <div class="bop-switch-header">
+            <span>المحوّل (Diverter)</span>
+            <span class="status-light closed" id="light-diverter"></span>
+          </div>
+          <div class="bop-btn-group">
+            <button class="bop-action-btn" id="btn-diverter-open" onclick="toggleBOPElement('diverter', true)">توجيه للخارج</button>
+            <button class="bop-action-btn active-close" id="btn-diverter-close" onclick="toggleBOPElement('diverter', false)">إغلاق</button>
+          </div>
+        </div>
+      </div>
+      <div class="choke-box">
+        <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold;">
+          <span style="color:var(--accent-yellow)">🎛️ صمام الخنق الهيدروليكي (Choke Manifold):</span>
+          <span id="choke-status-text" style="color:var(--accent-red)">0% (مغلق)</span>
+        </div>
+        <div class="choke-slider-bar">
+          <button class="choke-fine-btn" onclick="adjustChokeRel(-5)">-5%</button>
+          <button class="choke-fine-btn" onclick="adjustChokeRel(-1)">-1%</button>
+          <input type="range" class="choke-slider" id="choke-range" min="0" max="100" value="0" step="1" oninput="onChokeManualChange(this.value)">
+          <button class="choke-fine-btn" onclick="adjustChokeRel(+1)">+1%</button>
+          <button class="choke-fine-btn" onclick="adjustChokeRel(+5)">+5%</button>
+        </div>
+      </div>
+      <div class="protocol-steps" id="protocol-container">
+        <button class="step-btn" id="p-step-1" onclick="executeProcedureStep(1)">
+          <span>1. رفع مواسير الحفر وتأكيد الوصلة (Space Out)</span>
+          <span class="step-icon">⚪</span>
+        </button>
+        <button class="step-btn" id="p-step-2" onclick="executeProcedureStep(2)">
+          <span>2. إيقاف مضخات سائل الحفر والتحقق من التدفق (Pumps Off)</span>
+          <span class="step-icon">⚪</span>
+        </button>
+        <button class="step-btn" id="p-step-3" onclick="executeProcedureStep(3)">
+          <span>3. فتح صمام خط الخنق الهيدروليكي (Open HCR Valve)</span>
+          <span class="step-icon">⚪</span>
+        </button>
+        <button class="step-btn" id="p-step-4" onclick="executeProcedureStep(4)">
+          <span>4. إغلاق المانع الحلقي حول المواسير (Close Annular)</span>
+          <span class="step-icon">⚪</span>
+        </button>
+        <button class="step-btn" id="p-step-5" onclick="executeProcedureStep(5)">
+          <span>5. إغلاق صمام الخنق تدريجياً وتثبيت الضغوط (Close Choke)</span>
+          <span class="step-icon">⚪</span>
+        </button>
+      </div>
+      <div class="shear-cover">
+        <div style="font-size:11px; color:var(--accent-purple); font-weight:bold; display:flex; justify-content:space-between;">
+          <span>المكبس القاطع (Blind Shear Ram)</span>
+          <span>⚠️ إجراء طارئ نهائي</span>
+        </div>
+        <button class="btn-shear-ram" onclick="actuateShearRams()">✂️ تفعيل المكبس القاطع وقص المواسير (Shear Pipe)</button>
+      </div>
+    </div>
+  </div>
+  <div id="kill-sheet-module">
+    <div class="panel-title" style="margin-bottom:12px;">
+      <span style="font-size:15px;">📐 ورقة حسابات قتل البئر المعتمدة (IWCF / IADC Kill Sheet Form)</span>
+      <span style="color:var(--accent-green)">WELL SHUT-IN CONFIRMED</span>
+    </div>
+    <div class="killsheet-grid">
+      <div class="sheet-group">
+        <div class="sheet-group-title">1. البيانات الحقلية المقاسة (Field Data)</div>
+        <div class="field-row">
+          <span>العمق العمودي الحقيقي (TVD):</span>
+          <input type="text" id="ks-tvd" value="10,000" readonly> ft
+        </div>
+        <div class="field-row">
+          <span>وزن الطين الحالي (OMW):</span>
+          <input type="text" id="ks-omw" value="10.2" readonly> ppg
+        </div>
+        <div class="field-row">
+          <span>ضغط المواسير المستقر (SIDPP):</span>
+          <input type="text" id="ks-sidpp" value="480" readonly> psi
+        </div>
+        <div class="field-row">
+          <span>ضغط الفراغ الحلقي المستقر (SICP):</span>
+          <input type="text" id="ks-sicp" value="680" readonly> psi
+        </div>
+        <div class="field-row">
+          <span>معدل الضخ المخفض (SCR @ 30 SPM):</span>
+          <input type="text" id="ks-scr" value="750" readonly> psi
+        </div>
+      </div>
+      <div class="sheet-group">
+        <div class="sheet-group-title">2. الحسابات الهندسية (Calculations)</div>
+        <div class="field-row">
+          <span>وزن طين القتل (Kill Mud Weight - KMW):</span>
+          <input type="number" step="0.1" id="input-kmw" value="11.1"> ppg
+        </div>
+        <div class="formula-box">
+          KMW = OMW + [SIDPP / (0.052 × TVD)]
+        </div>
+        <div class="field-row">
+          <span>ضغط التدوير الأولي (Initial Circulating P - ICP):</span>
+          <input type="number" id="input-icp" value="1230"> psi
+        </div>
+        <div class="formula-box">
+          ICP = SIDPP + SCR
+        </div>
+        <div class="field-row">
+          <span>ضغط التدوير النهائي (Final Circulating P - FCP):</span>
+          <input type="number" id="input-fcp" value="816"> psi
+        </div>
+        <div class="formula-box">
+          FCP = SCR × (KMW / OMW)
+        </div>
+      </div>
+      <div class="sheet-group">
+        <div class="sheet-group-title">3. اختيار طريقة القتل والبدء بالضخ</div>
+        <div style="font-size:12px; line-height:1.6; color:var(--text-main);">
+          اختر البروتوكول المعتمد لبدء تدوير وطرد موائع الرفسة وإحلال سائل القتل:
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+          <button class="step-btn" style="background:#238636; color:white; justify-content:center; font-weight:bold;" onclick="executeWellKill('WW')">
+            🚀 طريقة الانتظار والوزن (Wait & Weight Method - دورة واحدة)
+          </button>
+          <button class="step-btn" style="background:#1f6feb; color:white; justify-content:center; font-weight:bold;" onclick="executeWellKill('DM')">
+            🔄 طريقة الحفار (Driller's Method - دورتين تدوير)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="assessment-modal">
+    <div style="font-size:18px; font-weight:bold; color:var(--accent-yellow);">📋 تقرير تقييم الكفاءة والاعتماد المهني (WellSharp / IWCF Evaluation)</div>
+    <div class="score-badge" id="eval-score-badge">95/100</div>
+    <div id="eval-cert-title" style="font-size:16px; font-weight:bold; color:var(--accent-green); margin-bottom:12px;">مؤهل بدرجة: مشرف حفر معتمد (Certified Well Control Supervisor) 🏆</div>
+    <div class="criteria-list" id="eval-criteria-details"></div>
+    <button class="btn-reset" style="margin-top:16px; width:100%; padding:12px; font-size:14px;" onclick="resetSimulator()">إعادة المحاكاة والتحدي 🔄</button>
+  </div>
+</div>
+<script>
+const SIM = {
+  activeScenario: 1,
+  isRunning: false,
+  isKick: false,
+  isShutIn: false,
+  isKilled: false,
+  isGameOver: false,
+  audioEnabled: false,
+  audioCtx: null,
+  TVD: 10000,
+  OMW: 10.2,
+  KMW: 11.12,
+  formationPressure: 5780,
+  SCR: 750,
+  pumpRate: 90,
+  killPumpRate: 30,
+  spp: 2200,
+  sidpp: 0,
+  sicp: 0,
+  flowPaddle: 50,
+  pitGain: 0,
+  tripTankVol: 25.0,
+  chokePercent: 0,
+  currentStep: 0,
+  spaceOutDone: false,
+  pumpsOff: false,
+  hcrOpen: false,
+  annularClosed: false,
+  pipeRamClosed: false,
+  diverterOpen: false,
+  shearRamsCut: false,
+  kickStartTime: 0,
+  shutInTime: 0,
+  waterHammerSurge: 0,
+  elapsedSeconds: 0,
+  timerInterval: null,
+  physicsInterval: null
+};
+let scene, camera, renderer, controls;
+let drillPipeMesh, annularPackingMesh;
+let pipeRamLeftMesh, pipeRamRightMesh, shearRamLeftMesh, shearRamRightMesh;
+let chokeValveMesh, seaWaterMesh, seafloorMesh, marineRiserMesh;
+let kickGasParticles, killMudParticles;
+let currentRigMode = 'subsea';
+
+function init3D() {
+  const container = document.getElementById('canvas-container');
+  if (!container) return;
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x040914, 0.035);
+  camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+  camera.position.set(7, 4, 13);
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.shadowMap.enabled = true;
+  container.appendChild(renderer.domElement);
+  if (typeof THREE.OrbitControls !== 'undefined') {
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.1;
+  }
+  const ambLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambLight);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+  dirLight.position.set(12, 25, 12);
+  dirLight.castShadow = true;
+  scene.add(dirLight);
+  const subLight = new THREE.PointLight(0x1f6feb, 2, 20);
+  subLight.position.set(0, -2, 5);
+  scene.add(subLight);
+  build3DWorld();
+  animate3D();
+  window.addEventListener('resize', () => {
+    if (!renderer || !camera || !container) return;
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  });
+}
+
+function build3DWorld() {
+  const toRemove = [];
+  scene.children.forEach(obj => {
+    if (obj.type === 'Mesh' || obj.type === 'Group') toRemove.push(obj);
+  });
+  toRemove.forEach(obj => scene.remove(obj));
+  const metalMat = new THREE.MeshStandardMaterial({ color: 0x8b949e, metalness: 0.8, roughness: 0.2 });
+  const darkMetal = new THREE.MeshStandardMaterial({ color: 0x21262d, metalness: 0.7, roughness: 0.4 });
+  const yellowMat = new THREE.MeshStandardMaterial({ color: 0xf0b429, metalness: 0.6, roughness: 0.3 });
+  const redMat = new THREE.MeshStandardMaterial({ color: 0xda3633, metalness: 0.5, roughness: 0.3 });
+  const purpleMat = new THREE.MeshStandardMaterial({ color: 0x8957e5, metalness: 0.7, roughness: 0.3 });
+
+  const seaFloorGeo = new THREE.CylinderGeometry(8, 8, 1, 32);
+  const strataMat = new THREE.MeshStandardMaterial({ color: 0x3d2714, roughness: 0.9 });
+  seafloorMesh = new THREE.Mesh(seaFloorGeo, strataMat);
+  seafloorMesh.position.y = -6;
+  scene.add(seafloorMesh);
+
+  const wellhead = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 2.5, 32), redMat);
+  wellhead.position.y = -4.5;
+  scene.add(wellhead);
+
+  const pipeGeo = new THREE.CylinderGeometry(0.22, 0.22, 24, 32);
+  drillPipeMesh = new THREE.Mesh(pipeGeo, metalMat);
+  drillPipeMesh.position.y = 1;
+  scene.add(drillPipeMesh);
+
+  const bopStack = new THREE.Group();
+  bopStack.position.y = -1;
+  scene.add(bopStack);
+
+  const connector = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 0.8, 32), darkMetal);
+  connector.position.y = -2;
+  bopStack.add(connector);
+
+  const shearRamHousing = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.8, 1.4), purpleMat);
+  shearRamHousing.position.y = -1.2;
+  bopStack.add(shearRamHousing);
+
+  shearRamLeftMesh = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.8), darkMetal);
+  shearRamLeftMesh.position.set(-0.9, -1.2, 0);
+  bopStack.add(shearRamLeftMesh);
+
+  shearRamRightMesh = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.8), darkMetal);
+  shearRamRightMesh.position.set(0.9, -1.2, 0);
+  bopStack.add(shearRamRightMesh);
+
+  const pipeRamHousing = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.8, 1.4), darkMetal);
+  pipeRamHousing.position.y = -0.2;
+  bopStack.add(pipeRamHousing);
+
+  pipeRamLeftMesh = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.5, 0.7), yellowMat);
+  pipeRamLeftMesh.position.set(-0.8, -0.2, 0);
+  bopStack.add(pipeRamLeftMesh);
+
+  pipeRamRightMesh = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.5, 0.7), yellowMat);
+  pipeRamRightMesh.position.set(0.8, -0.2, 0);
+  bopStack.add(pipeRamRightMesh);
+
+  const spool = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.0, 0.9, 32), redMat);
+  spool.position.y = 0.8;
+  bopStack.add(spool);
+
+  const chokePipe = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.5, 16), metalMat);
+  chokePipe.rotation.z = Math.PI / 2;
+  chokePipe.position.set(1.5, 0.8, 0);
+  bopStack.add(chokePipe);
+
+  chokeValveMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.6, 16), yellowMat);
+  chokeValveMesh.position.set(2.6, 0.8, 0);
+  bopStack.add(chokeValveMesh);
+
+  const killPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.5, 16), metalMat);
+  killPipe.rotation.z = Math.PI / 2;
+  killPipe.position.set(-1.5, 0.8, 0);
+  bopStack.add(killPipe);
+
+  const annularHousing = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 1.4, 32), darkMetal);
+  annularHousing.position.y = 2.0;
+  bopStack.add(annularHousing);
+
+  const packGeo = new THREE.CylinderGeometry(0.28, 0.28, 1.2, 32);
+  const packMat = new THREE.MeshStandardMaterial({ color: 0x2ea043, roughness: 0.8 });
+  annularPackingMesh = new THREE.Mesh(packGeo, packMat);
+  annularPackingMesh.position.y = 2.0;
+  bopStack.add(annularPackingMesh);
+
+  const riserGeo = new THREE.CylinderGeometry(0.7, 0.7, 10, 32);
+  const riserMat = new THREE.MeshStandardMaterial({ color: 0x30363d, transparent: true, opacity: 0.65 });
+  marineRiserMesh = new THREE.Mesh(riserGeo, riserMat);
+  marineRiserMesh.position.y = 8;
+  scene.add(marineRiserMesh);
+
+  const seaGeo = new THREE.PlaneGeometry(30, 30);
+  const seaMat = new THREE.MeshStandardMaterial({ color: 0x052347, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+  seaWaterMesh = new THREE.Mesh(seaGeo, seaMat);
+  seaWaterMesh.rotation.x = -Math.PI / 2;
+  seaWaterMesh.position.y = 11;
+  scene.add(seaWaterMesh);
+
+  const partGeo = new THREE.SphereGeometry(0.1, 8, 8);
+  kickGasParticles = new THREE.Group();
+  const gasMat = new THREE.MeshBasicMaterial({ color: 0xf85149 });
+  for (let i = 0; i < 60; i++) {
+    const p = new THREE.Mesh(partGeo, gasMat);
+    p.position.set((Math.random() - 0.5) * 0.7, -10 - Math.random() * 5, (Math.random() - 0.5) * 0.7);
+    p.visible = false;
+    kickGasParticles.add(p);
+  }
+  scene.add(kickGasParticles);
+
+  killMudParticles = new THREE.Group();
+  const mudMat = new THREE.MeshBasicMaterial({ color: 0x58a6ff });
+  for (let i = 0; i < 60; i++) {
+    const m = new THREE.Mesh(partGeo, mudMat);
+    m.position.set((Math.random() - 0.5) * 0.7, -15, (Math.random() - 0.5) * 0.7);
+    m.visible = false;
+    killMudParticles.add(m);
+  }
+  scene.add(killMudParticles);
+}
+
+function animate3D() {
+  requestAnimationFrame(animate3D);
+  if (controls) controls.update();
+  if (SIM.isRunning && !SIM.isShutIn && !SIM.pumpsOff && drillPipeMesh) {
+    drillPipeMesh.rotation.y += 0.08;
+  }
+  if (SIM.isKick && !SIM.isKilled && kickGasParticles) {
+    const riseSpeed = SIM.isShutIn ? 0.01 : 0.05 + (SIM.chokePercent / 100) * 0.04;
+    kickGasParticles.children.forEach(p => {
+      p.visible = true;
+      p.position.y += riseSpeed;
+      if (p.position.y > 0.0 && p.position.y < 1.5 && SIM.chokePercent > 0) {
+        p.position.x += 0.04 * (SIM.chokePercent / 100);
+      }
+      if (p.position.y > 10.5 || p.position.x > 3.0) {
+        p.position.set((Math.random() - 0.5) * 0.7, -8 - Math.random() * 2, (Math.random() - 0.5) * 0.7);
+      }
+    });
+  }
+  if (SIM.isKilled && killMudParticles) {
+    killMudParticles.children.forEach(m => {
+      m.visible = true;
+      m.position.y += 0.04;
+      if (m.position.y > 10.0) m.position.y = -8;
+    });
+  }
+  if (renderer && scene && camera) {
+    renderer.render(scene, camera);
+  }
+}
+
+function switchRigView(mode) {
+  currentRigMode = mode;
+  document.getElementById('view-mode-subsea').classList.toggle('active', mode === 'subsea');
+  document.getElementById('view-mode-surface').classList.toggle('active', mode === 'surface');
+  if (seaWaterMesh) seaWaterMesh.visible = (mode === 'subsea');
+  if (marineRiserMesh) marineRiserMesh.visible = (mode === 'subsea');
+  if (mode === 'surface') camera.position.set(5, 6, 9);
+  else camera.position.set(7, 4, 13);
+}
+
+function reset3DCamera() {
+  if (controls) controls.reset();
+  camera.position.set(7, 4, 13);
+}
+
+function initAudio() {
+  if (!SIM.audioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    SIM.audioCtx = new AudioContext();
+  }
+}
+
+function toggleAudio() {
+  initAudio();
+  SIM.audioEnabled = !SIM.audioEnabled;
+  const btn = document.getElementById('audio-toggle-btn');
+  btn.innerText = SIM.audioEnabled ? "🔊 الصوت: مفعّل" : "🔇 الصوت: مكتوم";
+  btn.style.color = SIM.audioEnabled ? "var(--accent-green)" : "var(--text-main)";
+}
+
+function playTone(freq, type, duration, gainVal = 0.1) {
+  if (!SIM.audioEnabled || !SIM.audioCtx) return;
+  try {
+    const osc = SIM.audioCtx.createOscillator();
+    const gain = SIM.audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, SIM.audioCtx.currentTime);
+    gain.gain.setValueAtTime(gainVal, SIM.audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, SIM.audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(SIM.audioCtx.destination);
+    osc.start();
+    osc.stop(SIM.audioCtx.currentTime + duration);
+  } catch (e) {}
+}
+
+function playAlarmSound() {
+  if (!SIM.audioEnabled) return;
+  playTone(850, 'sawtooth', 0.25, 0.15);
+  setTimeout(() => playTone(650, 'sawtooth', 0.25, 0.15), 150);
+}
+
+function playHydraulicHiss() {
+  if (!SIM.audioEnabled || !SIM.audioCtx) return;
+  try {
+    const bufferSize = SIM.audioCtx.sampleRate * 0.4;
+    const buffer = SIM.audioCtx.createBuffer(1, bufferSize, SIM.audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    const noise = SIM.audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = SIM.audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1200;
+    const gain = SIM.audioCtx.createGain();
+    gain.gain.setValueAtTime(0.12, SIM.audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, SIM.audioCtx.currentTime + 0.4);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(SIM.audioCtx.destination);
+    noise.start();
+  } catch (e) {}
+}
+
+function drawSvgGauge(svgId, minVal, maxVal, currentVal, warningThreshold, alarmThreshold) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  const cx = 50, cy = 52, r = 40;
+  const startAngle = 135 * (Math.PI / 180);
+  const endAngle = 405 * (Math.PI / 180);
+  const clamped = Math.max(minVal, Math.min(maxVal, currentVal));
+  const ratio = (clamped - minVal) / (maxVal - minVal);
+  const currentAngle = startAngle + ratio * (endAngle - startAngle);
+  const needleLength = 34;
+  const nx = cx + needleLength * Math.cos(currentAngle);
+  const ny = cy + needleLength * Math.sin(currentAngle);
+  let needleColor = "#58a6ff";
+  if (currentVal >= alarmThreshold) needleColor = "#f85149";
+  else if (currentVal >= warningThreshold) needleColor = "#f0b429";
+
+  svg.innerHTML = `
+    <path d="M 21.7 80.3 A 40 40 0 1 1 78.3 80.3" fill="none" stroke="#21262d" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 68 23 A 40 40 0 0 1 78.3 80.3" fill="none" stroke="#da3633" stroke-width="6" stroke-linecap="round"/>
+    <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="${needleColor}" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="4" fill="${needleColor}"/>
+  `;
+}
+
+function updateAllGauges() {
+  drawSvgGauge('spp-gauge-svg', 0, 5000, SIM.spp, 3200, 4200);
+  drawSvgGauge('sidpp-gauge-svg', 0, 3000, SIM.sidpp, 600, 1200);
+  drawSvgGauge('sicp-gauge-svg', 0, 3000, SIM.sicp, 800, 1500);
+  drawSvgGauge('flow-gauge-svg', 0, 120, SIM.flowPaddle, 75, 90);
+
+  document.getElementById('spp-val').innerText = Math.round(SIM.spp).toLocaleString();
+  document.getElementById('sidpp-val').innerText = Math.round(SIM.sidpp).toLocaleString();
+  document.getElementById('sicp-val').innerText = Math.round(SIM.sicp).toLocaleString();
+  document.getElementById('flow-val').innerText = Math.round(SIM.flowPaddle) + '%';
+  document.getElementById('pit-gain-val').innerText = (SIM.pitGain >= 0 ? '+' : '') + SIM.pitGain.toFixed(1) + ' bbl (500 bbl)';
+  document.getElementById('trip-tank-val').innerText = SIM.tripTankVol.toFixed(1) + ' bbl';
+
+  if (chokeValveMesh) {
+    if (SIM.chokePercent === 0) chokeValveMesh.material.color.setHex(0xda3633);
+    else if (SIM.chokePercent === 100) chokeValveMesh.material.color.setHex(0x2ea043);
+    else chokeValveMesh.material.color.setHex(0xf0b429);
+  }
+}
+
+function startPhysicsLoop() {
+  if (SIM.physicsInterval) clearInterval(SIM.physicsInterval);
+  SIM.physicsInterval = setInterval(() => {
+    if (!SIM.isRunning || SIM.isGameOver) return;
+    SIM.elapsedSeconds++;
+    const min = String(Math.floor(SIM.elapsedSeconds / 60)).padStart(2, '0');
+    const sec = String(SIM.elapsedSeconds % 60).padStart(2, '0');
+    document.getElementById('timer-display').innerText = `⏱️ الاستجابة: ${min}:${sec}`;
+
+    if (!SIM.isKick && !SIM.isShutIn) {
+      SIM.spp = 2200 + (Math.random() * 30 - 15);
+      SIM.flowPaddle = 50 + (Math.random() * 2 - 1);
+    }
+    if (SIM.isKick && !SIM.isShutIn) {
+      playAlarmSound();
+      const influxRate = 0.45;
+      SIM.pitGain += influxRate;
+      SIM.flowPaddle = Math.min(115, 55 + (SIM.pitGain * 2.5));
+      SIM.spp = Math.max(1600, 2200 - SIM.pitGain * 25);
+      const banner = document.getElementById('status-banner');
+      banner.className = "status-banner danger";
+      document.getElementById('status-text').innerHTML = `⚠️ تحذير: ركلة غازية نشطة (KICK DETECTED)! زيادة الخزانات: +${SIM.pitGain.toFixed(1)} bbl`;
+
+      if (SIM.pitGain >= 40.0) {
+        triggerDisaster("انفجار كارثي للبئر (Surface Blowout)! تخطى حجم الاندفاع حاجز الأمان الحرج دون إغلاق البئر في الوقت المحدد.");
+      }
+    }
+    if (SIM.isShutIn && !SIM.isKilled) {
+      const targetSIDPP = 480;
+      const targetSICP = 680 + (SIM.waterHammerSurge);
+      if (SIM.sidpp < targetSIDPP) SIM.sidpp += 25;
+      if (SIM.sicp < targetSICP) SIM.sicp += 35;
+      if (SIM.chokePercent > 0) {
+        const chokeLeakRate = (SIM.chokePercent / 100) * 40;
+        SIM.sicp = Math.max(0, SIM.sicp - chokeLeakRate);
+        SIM.pitGain += 0.2 * (SIM.chokePercent / 100);
+      }
+    }
+    updateAllGauges();
+  }, 500);
+}
+
+function executeProcedureStep(step) {
+  if (!SIM.isKick || SIM.isGameOver) {
+    showHint("💡 انتظر حتى يتم رصد مؤشرات الرفسة (Kick) قبل الشروع في بروتوكول الطوارئ.");
+    return;
+  }
+  if (step === 1) {
+    SIM.spaceOutDone = true;
+    SIM.currentStep = 1;
+    if (drillPipeMesh) drillPipeMesh.position.y += 1.6;
+    markStepDone(1, "تم رفع عمود الحفر وتجنيب وصلة المواسير (Space Out) ✅");
+    showHint("💡 ممتاز: تم إبعاد وصلة الأنابيب (Tool Joint) عن موانع الانفجار. الخطوة التالية: إيقاف المضخات.");
+  } else if (step === 2) {
+    if (!SIM.spaceOutDone) {
+      showHint("⚠️ خطأ هندسي: يجب رفع المواسير وتجنيب الوصلة (Space Out) أولاً!");
+      return;
+    }
+    SIM.pumpsOff = true;
+    SIM.currentStep = 2;
+    SIM.spp = 0;
+    SIM.flowPaddle = 0;
+    document.getElementById('pumps-spm-val').innerText = "0 SPM (متوقف)";
+    document.getElementById('circ-status').innerText = "المضخات متوقفة (Pumps Off)";
+    markStepDone(2, "تم إيقاف مضخات سائل الحفر والتحقق من تدفق البئر ✅");
+    showHint("💡 البئر ما زال يتدفق ذاتياً! افتح صمام خط الخنق (HCR) لتطبيق الإغلاق الناعم (Soft Shut-in).");
+  } else if (step === 3) {
+    if (!SIM.pumpsOff) {
+      showHint("⚠️ يجب إيقاف المضخات أولاً والتأكد من استمرار التدفق.");
+      return;
+    }
+    toggleBOPElement('hcr', true);
+    SIM.currentStep = 3;
+    markStepDone(3, "تم فتح صمام خط الخنق الهيدروليكي (HCR Open) ✅");
+    showHint("💡 خط الخنق مفتوح الآن. أغلق المانع الحلقي (Annular Preventer) لعزل الفراغ الحلقي بأمان.");
+  } else if (step === 4) {
+    if (!SIM.hcrOpen && SIM.activeScenario === 1) {
+      SIM.waterHammerSurge = 450;
+      document.getElementById('hammer-status').innerHTML = "<span style='color:var(--accent-red)'>صدمة هيدروليكية (+450 psi surge)!</span>";
+      showHint("⚠️ تحذير: أغلقت المانع الحلقي وصمام الخنق مغلق! هذا يسبب صدمة مائية خطيرة (Water Hammer) قد تكسر الطبقة الضعيفة.");
+    }
+    toggleBOPElement('annular', true);
+    SIM.currentStep = 4;
+    markStepDone(4, "تم إغلاق المانع الحلقي (Annular Preventer Closed) ✅");
+    showHint("💡 تم حبس معظم التدفق. أغلق صمام الخنق الهيدروليكي (Choke) تدريجياً لعزل البئر بالكامل وتثبيت الضغوط.");
+  } else if (step === 5) {
+    if (!SIM.annularClosed && !SIM.pipeRamClosed) {
+      showHint("⚠️ لا يمكنك حبس الضغط قبل إغلاق أحد موانع الاندفاع (Annular أو Pipe Rams)!");
+      return;
+    }
+    if (SIM.chokePercent > 0) {
+      showHint("💡 حرك صمام الخنق إلى 0% (مغلق تماماً) لإتمام الإغلاق الشامل.");
+      return;
+    }
+    SIM.isShutIn = true;
+    SIM.currentStep = 5;
+    markStepDone(5, "تم عزل البئر وتأكيد الإغلاق الشامل بنجاح (Well Shut-In) ✅");
+    const banner = document.getElementById('status-banner');
+    banner.className = "status-banner";
+    banner.style.backgroundColor = "var(--accent-green)";
+    document.getElementById('status-text').innerHTML = "✅ تم عزل وتأمين البئر بنجاح (Soft Shut-In Verified). جاري تثبيت وقراءة الضغوط...";
+    setTimeout(() => {
+      document.getElementById('kill-sheet-module').style.display = 'block';
+      document.getElementById('driller-hint').innerHTML = "📐 تم تسجيل ضغوط الإغلاق: انتقل لورقة الحسابات لحساب وزن سائل القتل (KMW) وضغط التدوير الأولي والنهائي (ICP/FCP).";
+      document.getElementById('kill-sheet-module').scrollIntoView({ behavior: 'smooth' });
+    }, 2000);
+  }
+}
+
+function markStepDone(num, text) {
+  const btn = document.getElementById(`p-step-${num}`);
+  if (btn) {
+    btn.classList.add('completed');
+    btn.innerHTML = `<span>${text}</span><span class="step-icon">✅</span>`;
+  }
+}
+
+function toggleBOPElement(type, closeIt) {
+  playHydraulicHiss();
+  if (type === 'annular') {
+    SIM.annularClosed = closeIt;
+    document.getElementById('light-annular').className = "status-light " + (closeIt ? "closed" : "open");
+    document.getElementById('btn-annular-close').className = "bop-action-btn " + (closeIt ? "active-close" : "");
+    document.getElementById('btn-annular-open').className = "bop-action-btn " + (!closeIt ? "active-open" : "");
+    if (annularPackingMesh) {
+      annularPackingMesh.scale.set(closeIt ? 0.35 : 1, 1, closeIt ? 0.35 : 1);
+      annularPackingMesh.material.color.setHex(closeIt ? 0xda3633 : 0x2ea043);
+    }
+  } else if (type === 'piperam') {
+    SIM.pipeRamClosed = closeIt;
+    document.getElementById('light-piperam').className = "status-light " + (closeIt ? "closed" : "open");
+    document.getElementById('btn-piperam-close').className = "bop-action-btn " + (closeIt ? "active-close" : "");
+    document.getElementById('btn-piperam-open').className = "bop-action-btn " + (!closeIt ? "active-open" : "");
+    if (pipeRamLeftMesh && pipeRamRightMesh) {
+      pipeRamLeftMesh.position.x = closeIt ? -0.4 : -0.8;
+      pipeRamRightMesh.position.x = closeIt ? 0.4 : 0.8;
+    }
+  } else if (type === 'hcr') {
+    SIM.hcrOpen = closeIt;
+    document.getElementById('light-hcr').className = "status-light " + (closeIt ? "open" : "closed");
+    document.getElementById('btn-hcr-open').className = "bop-action-btn " + (closeIt ? "active-open" : "");
+    document.getElementById('btn-hcr-close').className = "bop-action-btn " + (!closeIt ? "active-close" : "");
+  } else if (type === 'diverter') {
+    SIM.diverterOpen = closeIt;
+    document.getElementById('light-diverter').className = "status-light " + (closeIt ? "open" : "closed");
+    document.getElementById('btn-diverter-open').className = "bop-action-btn " + (closeIt ? "active-open" : "");
+    document.getElementById('btn-diverter-close').className = "bop-action-btn " + (!closeIt ? "active-close" : "");
+  }
+}
+
+function onChokeManualChange(val) {
+  SIM.chokePercent = parseInt(val);
+  const range = document.getElementById('choke-range');
+  if (range) range.value = SIM.chokePercent;
+  let text = SIM.chokePercent + "% ";
+  if (SIM.chokePercent === 0) text += "(مغلق تماماً)";
+  else if (SIM.chokePercent === 100) text += "(مفتوح 100%)";
+  else text += "(خنق تدريجي)";
+  const label = document.getElementById('choke-status-text');
+  label.innerText = text;
+  label.style.color = SIM.chokePercent === 0 ? "var(--accent-red)" : (SIM.chokePercent === 100 ? "var(--accent-green)" : "var(--accent-yellow)");
+}
+
+function adjustChokeRel(delta) {
+  const newVal = Math.max(0, Math.min(100, SIM.chokePercent + delta));
+  onChokeManualChange(newVal);
+}
+
+function actuateShearRams() {
+  if (SIM.isGameOver) return;
+  playHydraulicHiss();
+  SIM.shearRamsCut = true;
+  if (shearRamLeftMesh && shearRamRightMesh) {
+    shearRamLeftMesh.position.x = -0.3;
+    shearRamRightMesh.position.x = 0.3;
+  }
+  if (drillPipeMesh) {
+    drillPipeMesh.scale.y = 0.5;
+    drillPipeMesh.position.y = -3;
+  }
+  triggerDisaster("⚠️ تم تفعيل المكبس القاطع (Shear Ram Actuated)! قُطعت مواسير الحفر وتدلت في قاع البئر. إجراء طارئ متطرف يُلجأ إليه فقط عند الفشل الكامل لكافة وسائل السيطرة الأخرى.");
+}
+
+function executeWellKill(method) {
+  const userKMW = parseFloat(document.getElementById('input-kmw').value);
+  const userICP = parseFloat(document.getElementById('input-icp').value);
+  const userFCP = parseFloat(document.getElementById('input-fcp').value);
+  const kmwError = Math.abs(userKMW - 11.12);
+  const icpError = Math.abs(userICP - 1230);
+  const fcpError = Math.abs(userFCP - 817);
+  let calcScore = 30;
+  if (kmwError > 0.3) calcScore -= 10;
+  if (icpError > 50) calcScore -= 10;
+  if (fcpError > 50) calcScore -= 10;
+
+  SIM.isKilled = true;
+  document.getElementById('circ-status').innerText = `جاري ضخ سائل القتل الثقيل (${userKMW} ppg) بمعدل 30 SPM...`;
+  document.getElementById('pumps-spm-val').innerText = "30 SPM (Kill Pump Rate)";
+  document.getElementById('spp-val').innerText = userICP;
+
+  let killStep = 0;
+  const killInt = setInterval(() => {
+    killStep++;
+    SIM.sidpp = Math.max(0, SIM.sidpp - 80);
+    SIM.sicp = Math.max(0, SIM.sicp - 110);
+    SIM.spp = Math.max(userFCP, SIM.spp - 70);
+    updateAllGauges();
+    if (killStep >= 6) {
+      clearInterval(killInt);
+      SIM.sidpp = 0;
+      SIM.sicp = 0;
+      updateAllGauges();
+      showFinalAssessment(calcScore, method);
+    }
+  }, 600);
+}
+
+function showFinalAssessment(calcScore, method) {
+  SIM.isGameOver = true;
+  const modal = document.getElementById('assessment-modal');
+  modal.style.display = 'block';
+  let totalScore = 40;
+  totalScore += calcScore;
+  if (SIM.elapsedSeconds <= 35) totalScore += 20;
+  else if (SIM.elapsedSeconds <= 55) totalScore += 10;
+  if (SIM.waterHammerSurge > 0) totalScore -= 15;
+  totalScore = Math.max(0, Math.min(100, totalScore));
+
+  const badge = document.getElementById('eval-score-badge');
+  badge.innerText = `${totalScore}/100`;
+  let certTitle = "";
+  if (totalScore >= 85) {
+    badge.style.color = "var(--accent-green)";
+    certTitle = "🌟 مؤهل بدرجة: مشرف حفر بحري معتمد (Certified Well Control Supervisor) - امتياز";
+  } else if (totalScore >= 70) {
+    badge.style.color = "var(--accent-blue)";
+    certTitle = "✅ مؤهل بدرجة: حفار معتمد (Certified Driller Level) - نجاح";
+  } else {
+    badge.style.color = "var(--accent-red)";
+    certTitle = "❌ لم يجتز الاختبار (Did Not Pass) - إعادة التدريب مطلوبة وفق معايير السلامة";
+  }
+  document.getElementById('eval-cert-title').innerText = certTitle;
+  const criteria = document.getElementById('eval-criteria-details');
+  criteria.innerHTML = `
+    <div>⏱️ <strong>زمن الاستجابة وكشف الرفسة:</strong> ${SIM.elapsedSeconds} ثانية (${SIM.elapsedSeconds <= 35 ? 'استجابة فائقة السرعة ✅' : 'استجابة متأخرة نسبياً ⚠️'})</div>
+    <div>📏 <strong>دقة بروتوكول الإغلاق (Space Out & Soft Shut-in):</strong> ${SIM.waterHammerSurge === 0 ? 'سليم هندسياً وبدون صدمة مائية ✅' : 'رُصدت صدمة مطرقة هيدروليكية بسبب إغلاق غير ناعم ❌'}</div>
+    <div>📐 <strong>دقة حسابات ورقة القتل (Kill Sheet Calculations):</strong> ${calcScore}/30 درجة</div>
+    <div>🔄 <strong>المنهجية التشغيلية المنفذة:</strong> ${method === 'WW' ? 'طريقة الانتظار والوزن (Wait & Weight) - كفاءة عالية وضغوط سطحية منخفضة' : "طريقة الحفار (Driller's Method) - إزاحة مزدوجة ناجحة"}</div>
+  `;
+  modal.scrollIntoView({ behavior: 'smooth' });
+}
+
+function triggerDisaster(reason) {
+  SIM.isGameOver = true;
+  const modal = document.getElementById('assessment-modal');
+  modal.style.display = 'block';
+  modal.style.borderColor = "var(--accent-red)";
+  document.getElementById('eval-score-badge').innerText = "0/100";
+  document.getElementById('eval-score-badge').style.color = "var(--accent-red)";
+  document.getElementById('eval-cert-title').innerText = "💥 حادث تشغيلي خطير - إخفاق في السيطرة";
+  document.getElementById('eval-criteria-details').innerHTML = `
+    <div style="color:var(--accent-red); font-weight:bold; font-size:14px;">${reason}</div>
+  `;
+  modal.scrollIntoView({ behavior: 'smooth' });
+}
+
+function showHint(text) {
+  const hint = document.getElementById('driller-hint');
+  if (hint) hint.innerHTML = text;
+}
+
+function selectScenario(scNum) {
+  SIM.activeScenario = scNum;
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.getElementById(`sc-btn-${i}`);
+    if (btn) btn.classList.toggle('active', i === scNum);
+  }
+  resetSimulator();
+
+  if (scNum === 1) {
+    showHint("🎯 السيناريو 1: حفر طبيعي عند 10,000 قدم. راقب زيادة الخزانات ومؤشر التدفق ونفذ Soft Shut-in بدقة.");
+  } else if (scNum === 2) {
+    showHint("🎯 السيناريو 2: سحب مواسير الحفر (Tripping Out). راقب خزان الرحلات (Trip Tank) لتشخيص رشف الغاز (Swabbing).");
+    SIM.tripTankVol = 18.0;
+    document.getElementById('trip-tank-val').innerText = "18.0 bbl (نقص 7 bbl!)";
+    setTimeout(() => { triggerKickEvent(); }, 3000);
+  } else if (scNum === 3) {
+    showHint("🎯 السيناريو 3: تدفق غاز سطحي (Shallow Gas). تحذير: إغلاق BOP قد يكسر القاع إلى البحر! الحل: توجيه المحوّل (Diverter) وزيادة الضخ.");
+    setTimeout(() => {
+      SIM.isKick = true;
+      document.getElementById('status-banner').className = "status-banner danger";
+      document.getElementById('status-text').innerText = "⚠️ تدفق غاز سطحي (Shallow Gas)! لا تغلق مانع الاندفاع، افتح المحوّل فوراً!";
+    }, 2500);
+  } else if (scNum === 4) {
+    showHint("🎯 السيناريو 4: مقارنة الإغلاق الصلب (Hard Shut-in) والناعم (Soft Shut-in). جرب الإغلاق المباشر للمانع وقارن الصدمة الهيدروليكية.");
+    setTimeout(() => { triggerKickEvent(); }, 2000);
+  } else if (scNum === 5) {
+    showHint("🎯 السيناريو 5: هبوط مفاجئ في مستوى سائل الحفر (Lost Circulation) أدى لانخفاض العمود وتدفق رفسة ثانوية.");
+    setTimeout(() => {
+      SIM.pitGain = -15.0;
+      document.getElementById('pit-gain-val').innerText = "-15.0 bbl (فقدان طين!)";
+      setTimeout(() => { triggerKickEvent(); }, 3000);
+    }, 1500);
+  }
+}
+
+function triggerKickEvent() {
+  if (SIM.isKick || SIM.isGameOver) return;
+  SIM.isKick = true;
+  SIM.kickStartTime = Date.now();
+  updateAllGauges();
+}
+
+function resetSimulator() {
+  SIM.isRunning = true;
+  SIM.isKick = false;
+  SIM.isShutIn = false;
+  SIM.isKilled = false;
+  SIM.isGameOver = false;
+  SIM.currentStep = 0;
+  SIM.spaceOutDone = false;
+  SIM.pumpsOff = false;
+  SIM.hcrOpen = false;
+  SIM.annularClosed = false;
+  SIM.pipeRamClosed = false;
+  SIM.diverterOpen = false;
+  SIM.shearRamsCut = false;
+  SIM.elapsedSeconds = 0;
+  SIM.pitGain = 0;
+  SIM.spp = 2200;
+  SIM.sidpp = 0;
+  SIM.sicp = 0;
+  SIM.flowPaddle = 50;
+  SIM.chokePercent = 0;
+  SIM.waterHammerSurge = 0;
+
+  document.getElementById('status-banner').className = "status-banner";
+  document.getElementById('status-banner').style.backgroundColor = "#238636";
+  document.getElementById('status-text').innerText = "✅ حالة البئر: عمليات الحفر مستقرة - الضغط الهيدروستاتيكي متوازن";
+  document.getElementById('timer-display').innerText = "⏱️ الاستقرار: 00:00";
+  document.getElementById('hammer-status').innerHTML = "<span style='color:var(--accent-green)'>آمن (0 psi surge)</span>";
+  document.getElementById('circ-status').innerText = "دوران طبيعي (Normal Circulation)";
+  document.getElementById('pumps-spm-val').innerText = "90 SPM (Pump 1+2)";
+  document.getElementById('kill-sheet-module').style.display = 'none';
+  document.getElementById('assessment-modal').style.display = 'none';
+
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.getElementById(`p-step-${i}`);
+    if (btn) {
+      btn.classList.remove('completed');
+      btn.innerHTML = `<span>${btn.innerText.replace('✅', '').trim()}</span><span class="step-icon">⚪</span>`;
+    }
+  }
+  toggleBOPElement('annular', false);
+  toggleBOPElement('piperam', false);
+  toggleBOPElement('hcr', false);
+  toggleBOPElement('diverter', false);
+  onChokeManualChange(0);
+
+  if (drillPipeMesh) {
+    drillPipeMesh.position.y = 1;
+    drillPipeMesh.scale.y = 1;
+  }
+  if (shearRamLeftMesh && shearRamRightMesh) {
+    shearRamLeftMesh.position.x = -0.9;
+    shearRamRightMesh.position.x = 0.9;
+  }
+  if (kickGasParticles) {
+    kickGasParticles.children.forEach(p => p.visible = false);
+  }
+  if (killMudParticles) {
+    killMudParticles.children.forEach(m => m.visible = false);
+  }
+
+  updateAllGauges();
+  startPhysicsLoop();
+
+  if (SIM.activeScenario === 1) {
+    setTimeout(() => { triggerKickEvent(); }, 4000);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  init3D();
+  updateAllGauges();
+  startPhysicsLoop();
+  setTimeout(() => { triggerKickEvent(); }, 4500);
+});
+</script>
+</body>
+</html>
