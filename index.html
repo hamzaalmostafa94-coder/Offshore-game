@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg-dark: #0a0f18;
-      --panel-bg: rgba(13, 23, 38, 0.88);
+      --panel-bg: rgba(13, 23, 38, 0.92);
       --panel-border: #1e3a5f;
       --accent-cyan: #00d2ff;
       --accent-green: #00ff88;
@@ -51,28 +51,6 @@
     .meter-fill.warn { background: var(--accent-warn); }
     .meter-fill.danger { background: var(--accent-danger); }
 
-    /* شريط تنبيه الطوارئ والتحديات الهندسية الميدانية */
-    .emergency-alert-banner {
-      position: absolute; top: 78px; left: 50%; transform: translateX(-50%);
-      width: 580px; max-width: 92%; background: linear-gradient(135deg, rgba(255, 51, 68, 0.95), rgba(180, 20, 30, 0.95));
-      border: 2px solid #ff3344; border-radius: 12px; padding: 12px 18px; color: #fff;
-      box-shadow: 0 0 30px rgba(255, 51, 68, 0.7); backdrop-filter: blur(8px);
-      z-index: 50; display: flex; flex-direction: column; gap: 8px; text-align: center;
-      pointer-events: auto; animation: pulseEmergency 1.2s infinite alternate;
-    }
-    @keyframes pulseEmergency {
-      0% { box-shadow: 0 0 15px rgba(255, 51, 68, 0.4); transform: translateX(-50%) scale(1); }
-      100% { box-shadow: 0 0 35px rgba(255, 51, 68, 0.85); transform: translateX(-50%) scale(1.02); }
-    }
-    .emergency-header { font-size: 1rem; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
-    .emergency-desc { font-size: 0.82rem; line-height: 1.4; color: #ffe4e6; }
-    .emergency-btn {
-      background: #fff; color: #b91c1c; border: none; padding: 9px 16px; border-radius: 8px;
-      font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-    }
-    .emergency-btn:hover { background: #ffeaec; transform: translateY(-1px); }
-
     .middle-area { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 10px; flex: 1; pointer-events: none; }
 
     .telemetry-panel {
@@ -98,7 +76,7 @@
     .telemetry-val { font-weight: 700; color: #fff; }
 
     .controls-panel {
-      width: 320px; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 12px;
+      width: 330px; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 12px;
       padding: 16px; backdrop-filter: blur(10px); box-shadow: 0 8px 24px rgba(0,0,0,0.4);
       display: flex; flex-direction: column; gap: 14px; pointer-events: auto;
     }
@@ -110,10 +88,10 @@
     .phase-step.completed .step-number { background: var(--accent-green); color: #000; }
 
     .action-button {
-      background: linear-gradient(135deg, #0088cc, #005588); color: #fff; border: none; padding: 10px 14px;
-      border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s ease;
+      background: linear-gradient(135deg, #0088cc, #005588); color: #fff; border: none; padding: 12px 14px;
+      border-radius: 8px; cursor: pointer; font-size: 0.92rem; font-weight: 700; transition: all 0.2s ease;
       display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(0,136,204,0.3);
-      width: 100%;
+      width: 100%; font-family: inherit;
     }
     .action-button:hover:not(:disabled) { background: linear-gradient(135deg, #00aaff, #0077bb); transform: translateY(-1px); }
     .action-button:disabled { background: #1f2a3a; color: #64748b; cursor: not-allowed; box-shadow: none; }
@@ -137,18 +115,6 @@
     .dp-btn { background: #18283e; border: 1px solid #23436b; color: #cbd5e1; padding: 8px 0; border-radius: 6px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
     .dp-btn:hover { background: var(--accent-cyan); color: #000; }
 
-    /* لوحة معايرة أوتار التثبيت الخاصة بالمستوى 2 */
-    .tether-hud-box {
-      background: rgba(8, 18, 30, 0.8); border: 1px solid #1a3a5f; border-radius: 8px; padding: 10px;
-      display: flex; flex-direction: column; gap: 6px; font-size: 0.78rem;
-    }
-    .tether-row { display: flex; justify-content: space-between; align-items: center; }
-    .tether-bar-bg { width: 90px; height: 8px; background: #162438; border-radius: 4px; overflow: hidden; }
-    .tether-bar-fill { height: 100%; width: 50%; background: var(--accent-cyan); transition: width 0.3s; }
-    .tether-actions { display: flex; gap: 4px; }
-    .tether-btn { background: #1e3a5f; border: 1px solid #2f5686; color: #fff; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
-    .tether-btn:hover { background: var(--accent-cyan); color: #000; }
-
     .bottom-bar {
       display: flex; justify-content: space-between; align-items: center; background: var(--panel-bg);
       border: 1px solid var(--panel-border); border-radius: 12px; padding: 10px 20px; backdrop-filter: blur(10px);
@@ -160,21 +126,21 @@
 
     /* Modals & Backdrop */
     .modal-backdrop {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 10, 18, 0.92);
-      backdrop-filter: blur(10px); z-index: 100; display: flex; align-items: center; justify-content: center;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 10, 18, 0.94);
+      backdrop-filter: blur(12px); z-index: 100; display: flex; align-items: center; justify-content: center;
       pointer-events: auto; flex-direction: column;
     }
     .modal-card {
-      width: 550px; max-width: 94%; background: #0d1a2d; border: 1px solid #204570; border-radius: 16px;
+      width: 560px; max-width: 94%; background: #0d1a2d; border: 1px solid #204570; border-radius: 16px;
       padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.85); display: flex; flex-direction: column; gap: 14px; text-align: center;
       max-height: 94vh; overflow-y: auto; position: relative;
     }
     .modal-card h2 { color: var(--accent-cyan); font-size: 1.35rem; }
     .modal-card.game-over h2 { color: var(--accent-danger); }
     .modal-card.victory h2 { color: var(--accent-green); }
-    .scenario-selector { display: flex; flex-direction: column; gap: 10px; margin: 10px 0; }
+    .scenario-selector { display: flex; flex-direction: column; gap: 12px; margin: 10px 0; }
     .scenario-btn {
-      background: #13243a; border: 1px solid #204570; color: #fff; padding: 12px; border-radius: 10px;
+      background: #13243a; border: 1px solid #204570; color: #fff; padding: 14px 18px; border-radius: 10px;
       cursor: pointer; text-align: right; transition: all 0.2s ease; display: flex; justify-content: space-between; align-items: center;
     }
     .scenario-btn:hover { background: rgba(0, 210, 255, 0.15); border-color: var(--accent-cyan); transform: translateX(-4px); }
@@ -227,17 +193,13 @@
     .reg-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .wizard-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; }
 
-    .info-card { width: 550px; text-align: center; gap: 14px; }
+    .info-card { width: 560px; text-align: center; gap: 14px; }
     .hero-icon { font-size: 2.8rem; margin-bottom: -6px; animation: floatRig 3s infinite ease-in-out; }
     @keyframes floatRig { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
     .card-text-box {
       font-size: 0.88rem; color: #cbd5e1; line-height: 1.6; text-align: justify;
       background: rgba(16, 28, 45, 0.65); padding: 14px; border-radius: 10px; border: 1px solid rgba(0, 210, 255, 0.18);
     }
-
-    .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; text-align: right; }
-    .spec-item { background: rgba(19, 36, 58, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; }
-    .spec-title { color: var(--accent-cyan); font-weight: bold; font-size: 0.75rem; margin-bottom: 2px; }
 
     .hidden { display: none !important; }
 
@@ -272,30 +234,19 @@
 <body>
   <div id="webgl-container"></div>
 
-  <!-- 1. منطقة النقر السرية في أقصى يمين الشاشة العلوية -->
+  <!-- منطقة النقر السرية في أقصى يمين الشاشة العلوية للدخول إلى لوحة المدير -->
   <div id="adminSecretTrigger" onclick="handleAdminSecretTrigger()" ondblclick="openAdminLogin()" title=""></div>
-
-  <!-- 2. لافتة طوارئ التحديات الهندسية الميدانية في منتصف الشاشة -->
-  <div id="emergencyBanner" class="emergency-alert-banner hidden">
-    <div class="emergency-header">
-      <span id="emergencyTitle">⚠️ إنذار طارئ: عدم اتزان صهاريج الغمر!</span>
-      <span id="emergencyTimer" style="background:#000; padding:2px 8px; border-radius:4px; font-size:0.8rem;">8s</span>
-    </div>
-    <div id="emergencyDesc" class="emergency-desc">
-      اختلال توزيع مياه الموازنة يهدد بتصدع زاوية القاعدة الخرسانية. اضغط لمعادلة الصهاريج فوراً!
-    </div>
-    <div style="margin-top: 4px;">
-      <button id="emergencyActionBtn" class="emergency-btn" onclick="resolveCurrentEmergency()">
-        ⚖️ تشغيل مضخات الموازنة (Trim Ballast Pumps)
-      </button>
-    </div>
-  </div>
 
   <div class="ui-overlay">
     <div class="top-bar interactive">
       <div class="game-title">
         <span>⚓ محاكي هندسة المنصات البحرية</span>
         <div id="scenarioBadge" class="scenario-badge">المستوى 1: المياه الضحلة (GBS)</div>
+        <!-- زر الانتقال لمحاكي السيطرة على الآبار -->
+      <button type="button" class="action-button" onclick="goToWellControl()" 
+              style="width: auto; padding: 6px 14px; font-size: 0.8rem; background: linear-gradient(135deg, #f59e0b, #b45309); border: 1px solid #fcd34d; margin-right: 12px;">
+        🛢️ محاكي السيطرة على الآبار (BOP) ◀
+      </button>
       </div>
       <div class="resource-meters">
         <div class="meter-item">
@@ -338,10 +289,10 @@
           </div>
         </div>
         <div class="telemetry-row"><span>سرعة واتجاه الرياح</span><span id="valWind" class="telemetry-val">8 kts (NE)</span></div>
-        <div class="telemetry-row"><span>ارتفاع الأمواج (Swell)</span><span id="valWaves" class="telemetry-val">0.8 m</span></div>
+        <div class="telemetry-row"><span>ارتفاع الأمواج (Swell)</span><span id="valWaves" class="telemetry-val">0.6 m</span></div>
         <div class="dp-control-box">
           <div class="dp-header"><span>دوافع التموضع (DP Thrusters)</span><span style="font-size:0.75rem; color:var(--accent-cyan)">WASD أو الأسهم</span></div>
-          <div class="d-pad">
+          <div class="d-pad" style="direction: ltr;">
             <div></div><button class="dp-btn" onmousedown="applyThrust(0, -1)" onmouseup="stopThrust()">▲ شمال</button><div></div>
             <button class="dp-btn" onmousedown="applyThrust(-1, 0)" onmouseup="stopThrust()">◀ غرب</button>
             <button class="dp-btn" onclick="toggleAutoDP()">DP آلي</button>
@@ -355,7 +306,7 @@
         <div class="panel-header"><span>🏗️ مراحل التشييد الهندسي</span><span id="phasePercent" style="color: var(--accent-cyan); font-size: 0.85rem;">0%</span></div>
         <div id="step1" class="phase-step active">
           <div class="step-number">1</div>
-          <div><div style="font-weight: 600;">محاذاة موقع الحفر</div><div id="step1Desc" style="font-size: 0.75rem; color: var(--text-muted);">تثبيت المنصة في دائرة الأمان &lt; 3.5م</div></div>
+          <div><div style="font-weight: 600;">محاذاة موقع الحفر</div><div id="step1Desc" style="font-size: 0.75rem; color: var(--text-muted);">تثبيت المنصة في دائرة الأمان &lt; 4.0م</div></div>
         </div>
         <div id="step2" class="phase-step">
           <div class="step-number">2</div>
@@ -368,46 +319,6 @@
         <div id="step4" class="phase-step">
           <div class="step-number">4</div>
           <div><div style="font-weight: 600;">شد الكابلات وتمديد الأنابيب</div><div style="font-size: 0.75rem; color: var(--text-muted);">معايرة كابلات التثبيت وبدء التدفق</div></div>
-        </div>
-
-        <!-- لوحة معايرة أوتار الشد TLP (تظهر في المستوى 2 عند مرحلة التثبيت) -->
-        <div id="tetherHud" class="tether-hud-box hidden">
-          <div style="font-weight:bold; color:var(--accent-cyan); display:flex; justify-content:space-between;">
-            <span>معايرة شد الأوتار (TLP Tethers)</span>
-            <span id="tetherStatusText" style="color:var(--accent-green)">متزن</span>
-          </div>
-          <div class="tether-row">
-            <span>الوتر الشمالي (N):</span>
-            <div class="tether-bar-bg"><div id="barTetherN" class="tether-bar-fill" style="width:50%;"></div></div>
-            <div class="tether-actions">
-              <button class="tether-btn" onclick="adjustTether('N', 10)">+</button>
-              <button class="tether-btn" onclick="adjustTether('N', -10)">-</button>
-            </div>
-          </div>
-          <div class="tether-row">
-            <span>الوتر الجنوبي (S):</span>
-            <div class="tether-bar-bg"><div id="barTetherS" class="tether-bar-fill" style="width:50%;"></div></div>
-            <div class="tether-actions">
-              <button class="tether-btn" onclick="adjustTether('S', 10)">+</button>
-              <button class="tether-btn" onclick="adjustTether('S', -10)">-</button>
-            </div>
-          </div>
-          <div class="tether-row">
-            <span>الوتر الشرقي (E):</span>
-            <div class="tether-bar-bg"><div id="barTetherE" class="tether-bar-fill" style="width:50%;"></div></div>
-            <div class="tether-actions">
-              <button class="tether-btn" onclick="adjustTether('E', 10)">+</button>
-              <button class="tether-btn" onclick="adjustTether('E', -10)">-</button>
-            </div>
-          </div>
-          <div class="tether-row">
-            <span>الوتر الغربي (W):</span>
-            <div class="tether-bar-bg"><div id="barTetherW" class="tether-bar-fill" style="width:50%;"></div></div>
-            <div class="tether-actions">
-              <button class="tether-btn" onclick="adjustTether('W', 10)">+</button>
-              <button class="tether-btn" onclick="adjustTether('W', -10)">-</button>
-            </div>
-          </div>
         </div>
 
         <button id="btnMainAction" class="action-button" onclick="executeCurrentPhase()"><span>بدء إنزال القاعدة البحرية</span></button>
@@ -658,87 +569,48 @@
     </div>
   </div>
 
-  <!-- 3. نافذة اختيار المستوى -->
+  <!-- 3. نافذة اختيار المستوى والنتائج -->
   <div id="gameModal" class="modal-backdrop hidden">
     <div id="modalCard" class="modal-card">
       <div class="card-admin-hotspot" onclick="handleAdminSecretTrigger()" ondblclick="openAdminLogin()" title=""></div>
 
       <h2 id="modalTitle" onclick="handleAdminSecretTrigger()" ondblclick="openAdminLogin()" style="cursor: pointer;">اختيار مشروع الحفر البحري</h2>
-      <p id="modalDesc" style="color: var(--text-muted); font-size: 0.9rem;">اختر بيئة العمل لمعاينة التعليمات الهندسية ومواصفات المشروع والتحديات الحصرية:</p>
+      <div id="modalDesc" style="color: var(--text-muted); font-size: 0.9rem;">اختر بيئة العمل لبدء عمليات التثبيت والإنزال الميدانية:</div>
       
       <div id="scenarioList" class="scenario-selector">
-        <div class="scenario-btn" onclick="openLevelBriefing(1)">
+        <div class="scenario-btn" onclick="startScenario(1)">
           <div>
             <div style="font-weight: 700; color: var(--accent-green);">المستوى 1: المياه الضحلة (الخليج العربي)</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 40م | منصة GBS | تحدي دقة التمركز &lt; 3.5م وموازنة صهاريج الغمر</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 40م | طقس هادئ | منصة GBS خرسانية ثقيلة</div>
           </div>
-          <span style="color: var(--accent-cyan); font-weight: bold;">تعليمات وبدء ▶</span>
+          <span style="color: var(--accent-cyan); font-weight: bold;">بدء المهمة ▶</span>
         </div>
-        <div class="scenario-btn" onclick="openLevelBriefing(2)">
+        <div class="scenario-btn" onclick="startScenario(2)">
           <div>
             <div style="font-weight: 700; color: var(--accent-warn);">المستوى 2: بحر الشمال العاصف</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 250م | منصة TLP | هبوب رياح مباغت ومعايرة شد أوتار التثبيت</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 250م | أمطار وأمواج متلاطمة | منصة TLP بالأوتار المشدودة</div>
           </div>
-          <span style="color: var(--accent-warn); font-weight: bold;">تعليمات وبدء ▶</span>
+          <span style="color: var(--accent-warn); font-weight: bold;">بدء المهمة ▶</span>
         </div>
-        <div class="scenario-btn" onclick="openLevelBriefing(3)">
+        <div class="scenario-btn" onclick="startScenario(3)">
           <div>
             <div style="font-weight: 700; color: var(--accent-danger);">المستوى 3: المياه فائقة العمق (المحيط الأطلسي)</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 800م | سفينة حفر | عاصفة ليلية، خطر كسر ذراع الحفر، وأعطال الدوافع</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">عمق 800م | عاصفة ليلية وظلام دامس | سفينة حفر متطورة Drillship</div>
           </div>
-          <span style="color: var(--accent-danger); font-weight: bold;">تعليمات وبدء ▶</span>
+          <span style="color: var(--accent-danger); font-weight: bold;">بدء المهمة ▶</span>
         </div>
       </div>
       <button id="modalActionBtn" class="action-button hidden" onclick="restartOrNext()">إعادة المحاولة</button>
     </div>
   </div>
 
-  <!-- 4. نافذة التعليمات الفنية والتمهيد الهندسي لكل مستوى (Level Briefing) -->
-  <div id="levelBriefingModal" class="modal-backdrop hidden">
-    <div class="modal-card info-card">
-      <div id="briefingIcon" class="hero-icon">🌊</div>
-      <h2 id="briefingTitle">تعليمات ومواصفات المشروع</h2>
-      <div id="briefingBadge" class="scenario-badge" style="display: inline-block; align-self: center; margin-top: -6px;">المستوى 1</div>
-      
-      <div class="specs-grid">
-        <div class="spec-item">
-          <div class="spec-title">عمق المياه</div>
-          <div id="specDepth" style="color: #fff;">40 متر</div>
-        </div>
-        <div class="spec-item">
-          <div class="spec-title">نوع المنصة البحرية</div>
-          <div id="specPlatform" style="color: #fff;">منصة جاذبية خرسانية (GBS)</div>
-        </div>
-        <div class="spec-item">
-          <div class="spec-title">حالة الطقس والرياح</div>
-          <div id="specWeather" style="color: #fff;">بحر هادئ (رياح 8 عقد / أمواج 0.6م)</div>
-        </div>
-        <div class="spec-item">
-          <div class="spec-title">نطاق الأمان المسموح للـ DP</div>
-          <div id="specDPTolerance" style="color: var(--accent-green);">انحراف دقيق جداً < 3.5 متر</div>
-        </div>
-      </div>
-
-      <div id="briefingDesc" class="card-text-box"></div>
-
-      <div class="wizard-actions">
-        <button type="button" class="btn-secondary" onclick="backToScenarioList()" style="width: 130px;">
-          <span>◀ تغيير المستوى</span>
-        </button>
-        <button type="button" class="action-button" onclick="launchBriefedLevel()" style="flex: 1; padding: 12px; font-size: 0.95rem;">
-          <span>انطلاق وبدء المهمة ⚓</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-<!-- 5. نافذة التقييم الهندسي والاقتراحات بعد إنهاء المستوى الأول -->
+  <!-- 4. نافذة التقييم الهندسي والاقتراحات بعد إنهاء المستوى الأول -->
   <div id="feedbackModal" class="modal-backdrop hidden">
     <div class="modal-card info-card" style="width: 580px;">
       <div class="hero-icon" style="color: var(--accent-green); font-size: 2.2rem; margin-bottom: 2px;">🏆</div>
       <h2 style="color: var(--accent-green); font-size: 1.25rem;">تهانينا! تم إنجاز المستوى الأول بنجاح</h2>
       
-      <!-- كشف الحساب والرتبة الهندسية الممنوحة فوراً للمستوى 1 -->
+      <!-- كشف الحساب والرتبة الهندسية الممنوحة للمستوى 1 -->
       <div id="lvl1Scorecard" class="scorecard-box">
         <div id="sc1RankStars" class="score-rank-stars">⭐⭐⭐ A+</div>
         <div id="sc1RankTitle" class="score-rank-title">مهندس استشاري بحري أول</div>
@@ -769,9 +641,8 @@
       <div id="feedbackStatus" style="font-size: 0.8rem; color: var(--accent-cyan); display: none; margin-top: 4px;">جاري إرسال اقتراحك...</div>
     </div>
   </div>
-  
 
-  <!-- 6. نافذة إدخال كلمة سر المدير -->
+  <!-- 5. نافذة إدخال كلمة سر المدير -->
   <div id="adminPassModal" class="modal-backdrop hidden" style="z-index: 100000;">
     <div class="modal-card" style="width: 380px;">
       <h2>🔒 دخول المدير المصرح</h2>
@@ -787,7 +658,7 @@
     </div>
   </div>
 
-  <!-- 7. لوحة تحكم المدير (عرض البيانات والاقتراحات وتصدير الإكسل المنسق) -->
+  <!-- 6. لوحة تحكم المدير (عرض البيانات والاقتراحات وتصدير الإكسل المنسق) -->
   <div id="adminPanelModal" class="modal-backdrop hidden" style="z-index: 100000;">
     <div class="modal-card admin-card">
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e3a5f; padding-bottom: 10px;">
@@ -868,7 +739,6 @@
        إدارة النوافذ ومعالج التسجيل
        ========================================================================= */
     let currentWizardStep = 1;
-    let pendingLevelId = 1;
 
     function checkUserRegistration() {
       const isRegistered = localStorage.getItem('offshore_user_registered');
@@ -1009,7 +879,6 @@
         timestamp: new Date().toISOString()
       };
 
-      // 1. الحفظ السحابي المباشر في قاعدة بيانات Neon
       if (window.neonSql) {
         try {
           await window.neonSql`
@@ -1031,7 +900,6 @@
         }
       }
 
-      // 2. الحفظ المحلي كنسخة احتياطية
       localStorage.setItem('offshore_user_registered', 'true');
       localStorage.setItem('offshore_user_profile', JSON.stringify(fullProfile));
 
@@ -1043,119 +911,21 @@
       gameModal.classList.remove('hidden');
     }
 
-    /* تعريف مواصفات وتحديات المستويات الثلاثة */
-    const LEVEL_DATA = {
-      1: {
-        title: "مشروع تركيب منصة المياه الضحلة (الخليج العربي)",
-        badge: "المستوى 1: المياه الضحلة (GBS)",
-        icon: "🏖️",
-        depth: "40 متراً",
-        platform: "منصة جاذبية خرسانية ثقيلة (GBS)",
-        weather: "طقس نهار هادئ (رياح 8 عقد / أمواج 0.6م)",
-        tolerance: "انحراف دقيق جداً < 3.5 متر",
-        instructions: `
-          <b>🎯 الهدف الهندسي للمهمة:</b><br>
-          تثبيت قاعدة ثقيلة تعتمد على وزن الجاذبية (GBS) على قاع صخري/رملي مستوٍ، ثم رفع السطح وتوصيل خطوط التدفق.<br><br>
-          <b>⚡ التحديات الهندسية الحصرية للمستوى 1:</b><br>
-          1. <b>دقة التموضع الصارمة (&lt; 3.5م):</b> لا يمكن تعديل موقع القاعدة بعد ملامسة الرمل. يجب أن تثبت المنصة بدقة عالية قبل الضغط على الإنزال.<br>
-          2. <b>تحدي موازنة صهاريج الغمر (Ballast Water Trim):</b> أثناء إنزال الونش في المرحلة 2، تمتلئ الصهاريج بمياه البحر. إذا حدث أي اختلال في الاتزان (تجاوز الميلان 3.5°)، سينطلق إنذار أحمر، وعليك الضغط فوراً على زر <b>[تشغيل مضخات الموازنة Trim Pumps]</b> لمعادلة الميلان قبل تصدع القاعدة الخرسانية!<br><br>
-          💡 <i>نصيحة أمان: لا تستعجل إنزال الونش قبل ضبط التمركز التام وتصحيح أي ميلان بالصهاريج.</i>
-        `
-      },
-      2: {
-        title: "مشروع تركيب منصة بحر الشمال العاصف",
-        badge: "المستوى 2: المياه العميقة (TLP)",
-        icon: "🌊",
-        depth: "250 متراً",
-        platform: "منصة الأوتار المشدودة (Tension-Leg Platform - TLP)",
-        weather: "أمطار وأمواج متلاطمة (رياح 20-35 عقدة / أمواج 1.8م)",
-        tolerance: "انحراف مسموح < 7.0 متر",
-        instructions: `
-          <b>🎯 الهدف الهندسي للمهمة:</b><br>
-          تثبيت منصة عائمة مربوطة بأوتار شد فولاذية رأسية (Tethers) ترتبط بمراسي القاع على عمق 250 متراً.<br><br>
-          <b>⚡ التحديات الهندسية الحصرية للمستوى 2:</b><br>
-          1. <b>هبوب الرياح المباغت (Wind Squalls):</b> كل 20 ثانية ستضرب هبة رياح عنيفة تغير اتجاه الانجراف فجأة، وتتطلب تدخلاً يدوياً حاسماً بالدوافع (WASD).<br>
-          2. <b>فخ استهلاك الوقود المضاعف:</b> نظام الـ DP الآلي يستهلك الوقود بمعدل 3 أضعاف بسبب قوة الأمواج. تجنب الاعتماد الدائم على الآلي لئلا ينفد الوقود!<br>
-          3. <b>معايرة شد الأوتار الأربعة (Tether Tension Balancing):</b> في المرحلة الرابعة، يجب عليك مراقبة لوحة الأوتار (شمال، جنوب، شرق، غرب) واستخدام أزرار الشد للحفاظ على كل وتر بين 35% و 80%. فرط الشد يقطع الوتر، وارتخاؤه يقلب المنصة!<br><br>
-          💡 <i>نصيحة أمان: قُد الدوافع يدوياً، واستخدم الـ DP الآلي لثوانٍ معدودة عند الطوارئ فقط.</i>
-        `
-      },
-      3: {
-        title: "مشروع الحفر في المياه فائقة العمق (المحيط الأطلسي)",
-        badge: "المستوى 3: المياه فائقة العمق (Atlantic Storm)",
-        icon: "⚡",
-        depth: "800 متر",
-        platform: "سفينة حفر متطورة / شبه غاطسة (Drillship)",
-        weather: "عاصفة ليلية وصواعق رعدية (رياح 34-45 عقدة / أمواج 2.8م)",
-        tolerance: "خطر كسر ذراع الحفر عند ميلان > 10.0°",
-        instructions: `
-          <b>🎯 الهدف الهندسي للمهمة:</b><br>
-          العمليات البحرية القصوى لإنزال منظومة مانع الانفجار الثقيلة (BOP) لعمق 800 متر وسط عاصفة بحرية ليلية وظلام دامس.<br><br>
-          <b>⚡ التحديات الهندسية الحصرية للمستوى 3:</b><br>
-          1. <b>خطر قص ذراع الحفر (Drill Riser Shear Hazard):</b> زاوية الميلان الحرجة أصبحت <b>10 درجات فقط</b>! أي ميلان يتجاوزها سيكسر أنبوب الحفر فوراً ويسبب كارثة بيئية وخسارة المهمة.<br>
-          2. <b>أعطال القواطع الكهربائية للدوافع (Thruster Power Trip):</b> بسبب الصواعق والأحمال القصوى، ينفصل أحد الدوافع الرئيسية فجأة وتفقد السفينة توازنها. يظهر زر طوارئ وامض <b>[إعادة ضبط القاطع Reset Breaker]</b> ويجب عليك الضغط عليه خلال 7 ثوانٍ قبل الانجراف الكارثي!<br>
-          3. <b>نافذة الطقس المتضائلة:</b> تشتد العاصفة تدريجياً ويزداد ارتفاع الموج مع الوقت، مما يجعل سرعة الإنجاز حاسمة.<br><br>
-          💡 <i>نصيحة أمان: شغّل الكاشفات الليلية (Floodlights) فوراً وراقب مؤشر الزاوية الزئبقي دون انقطاع.</i>
-        `
-      }
-    };
-
-    /* =========================================================================
-       لوحة تعليمات وشرح المستوى الفني والتحديات
-       ========================================================================= */
-    function openLevelBriefing(levelId) {
-      pendingLevelId = levelId;
-      const data = LEVEL_DATA[levelId];
-
-      document.getElementById('briefingTitle').textContent = data.title;
-      document.getElementById('briefingBadge').textContent = data.badge;
-      document.getElementById('briefingIcon').textContent = data.icon;
-      document.getElementById('specDepth').textContent = data.depth;
-      document.getElementById('specPlatform').textContent = data.platform;
-      document.getElementById('specWeather').textContent = data.weather;
-      document.getElementById('specDPTolerance').textContent = data.tolerance;
-      document.getElementById('briefingDesc').innerHTML = data.instructions;
-
-      document.getElementById('gameModal').style.display = 'none';
-      document.getElementById('gameModal').classList.add('hidden');
-
-      const modal = document.getElementById('levelBriefingModal');
-      modal.style.display = 'flex';
-      modal.classList.remove('hidden');
-    }
-
-    function backToScenarioList() {
-      document.getElementById('levelBriefingModal').style.display = 'none';
-      document.getElementById('levelBriefingModal').classList.add('hidden');
-
-      const gameModal = document.getElementById('gameModal');
-      gameModal.style.display = 'flex';
-      gameModal.classList.remove('hidden');
-    }
-
-    function launchBriefedLevel() {
-      document.getElementById('levelBriefingModal').style.display = 'none';
-      document.getElementById('levelBriefingModal').classList.add('hidden');
-      startScenario(pendingLevelId);
-    }
-
     /* =========================================================================
        معالجة اقتراحات إنهاء المستوى الأول
        ========================================================================= */
     function showLevel1FeedbackModal() {
-      // حساب الرتبة الهندسية بناءً على كفاءة الميزانية والوقود
       let rankStars = "⭐ B";
       let rankTitle = "مساعد مهندس ميداني (Junior Field Engineer)";
       
-      if (gameState.budget > 2800000 && gameState.integrity >= 80 && gameState.fuel >= 40) {
+      if (gameState.budget > 2500000 && gameState.integrity >= 80 && gameState.fuel >= 35) {
         rankStars = "⭐⭐⭐ A+";
         rankTitle = "مهندس استشاري بحري أول (Master Offshore Superintendent)";
-      } else if (gameState.budget > 1800000 && gameState.integrity >= 65) {
+      } else if (gameState.budget > 1500000 && gameState.integrity >= 65) {
         rankStars = "⭐⭐ A";
         rankTitle = "مهندس عمليات بحرية متمرس (Field Operations Engineer)";
       }
 
-      // تعبئة البيانات في كشف الحساب
       document.getElementById('sc1RankStars').textContent = rankStars;
       document.getElementById('sc1RankTitle').textContent = rankTitle;
       document.getElementById('sc1Budget').textContent = "$" + Math.max(0, Math.floor(gameState.budget)).toLocaleString();
@@ -1195,7 +965,6 @@
         timestamp: new Date().toISOString()
       };
     
-      // حفظ الاقتراح سحابياً في جدول feedbacks في Neon
       if (window.neonSql) {
         try {
           await window.neonSql`
@@ -1211,13 +980,13 @@
       document.getElementById('feedbackModal').style.display = 'none';
       document.getElementById('feedbackModal').classList.add('hidden');
       
-      openLevelBriefing(2);
+      startScenario(2);
     }
 
     function skipFeedbackAndProceed() {
       document.getElementById('feedbackModal').style.display = 'none';
       document.getElementById('feedbackModal').classList.add('hidden');
-      openLevelBriefing(2);
+      startScenario(2);
     }
 
     /* =========================================================================
@@ -1283,13 +1052,11 @@
       }
     }
 
-    // دالة حذف طالب من سيرفر Neon
     async function deletePlayerRecord(id) {
       if (!confirm("هل أنت متأكد من حذف هذا السجل نهائياً من قاعدة بيانات Neon؟")) return;
       if (window.neonSql && id) {
         try {
           await window.neonSql`DELETE FROM players WHERE id = ${id}`;
-          console.log("تم حذف الطالب من Neon");
         } catch (err) {
           console.error("فشل الحذف من Neon:", err);
         }
@@ -1297,7 +1064,6 @@
       renderAdminDashboard();
     }
 
-    // دالة حذف اقتراح من سيرفر Neon
     async function deleteFeedbackRecord(id) {
       if (!confirm("هل أنت متأكد من حذف هذا الاقتراح نهائياً؟")) return;
       if (window.neonSql && id) {
@@ -1314,7 +1080,6 @@
       let users = [];
       let feedbacks = [];
 
-      // جلب السجلات الحية من قاعدة بيانات Neon السحابية
       if (window.neonSql) {
         try {
           users = await window.neonSql`SELECT * FROM players ORDER BY id DESC`;
@@ -1404,7 +1169,6 @@
       box.textContent = msg;
     }
 
-    // دالة تصدير ملف الإكسل المنسق هندسياً والمضمون
     async function exportAdminDataToExcel() {
       const rows = document.querySelectorAll('#adminUsersTbody tr');
       if (!rows || rows.length === 0 || rows[0].innerText.includes('لا توجد بيانات')) {
@@ -1461,7 +1225,6 @@
 
       excelHTML += `</tbody></table></body></html>`;
 
-      // 1. التصدير المباشر عبر بايثون لسطح المكتب
       if (window.pywebview && window.pywebview.api && window.pywebview.api.save_to_excel) {
         try {
           await window.pywebview.api.save_to_excel(excelHTML);
@@ -1470,7 +1233,6 @@
         } catch(err) {}
       }
 
-      // 2. التصدير عبر المتصفح العادي
       try {
         const blob = new Blob([excelHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -1487,10 +1249,10 @@
     }
 
     /* =========================================================================
-       محرك فيزياء اللعبة والتحديات الهندسية الحصرية لكل مستوى
+       محرك فيزياء اللعبة والمراحل الهندسية المتقنة
        ========================================================================= */
     const GAME_CONFIG = {
-      budgetRatePerSec: 1200, autoDPFuelRate: 0.12, manualThrustForce: 1.2, friction: 0.96, maxSafeDrift: 3.5, criticalTilt: 28.0
+      budgetRatePerSec: 2500, autoDPFuelRate: 0.15, manualThrustForce: 1.4, friction: 0.98, maxSafeDrift: 4.0, criticalTilt: 22.0
     };
 
     let gameState = {
@@ -1498,22 +1260,17 @@
       scenario: 1, phase: 1, budget: 5000000, fuel: 100, integrity: 100, timeLeft: 180,
       rigPos: { x: 0, z: 0 }, rigVel: { x: 0, z: 0 }, thrust: { x: 0, z: 0 }, autoDP: false,
       windVector: { x: 0.02, z: 0.015, speedKnots: 8 }, waveHeight: 0.6, tilt: 0, cameraViewIndex: 0,
-      isNight: false, gameOver: false, isPaused: false, craneLowerProgress: 0, deckInstallProgress: 0, pipesProgress: 0,
+      isNight: false, gameOver: false, isPaused: false,
       
-      // متغيرات التحديات الهندسية الميدانية
-      activeEmergency: null,
-      emergencyTimer: 0,
-      ballastTrimProgress: 0,
-      squallTimeLeft: 0,
-      thrustersOnline: true,
-      tethers: { N: 50, S: 50, E: 50, W: 50 },
+      // حالات التحكم بالمراحل اليدوية الصارمة
+      isLoweringCrane: false,
+      isInstallingDeck: false,
+      isConnectingPipes: false,
+      craneLowerProgress: 0,
+      deckInstallProgress: 0,
+      pipesProgress: 0,
       timeElapsed: 0
     };
-
-    function initAudio() {}
-    function playBeep() {}
-    function playClank() {}
-    function toggleAudio() {}
 
     let scene, camera, renderer, oceanMesh, oceanGeometry, seabedMesh;
     let rigGroup, baseTemplateGroup, craneGroup, deckGroup, derrickGroup, pipeLinesGroup;
@@ -1621,54 +1378,15 @@
 
     function applyThrust(dx, dz) {
       if (!gameState.isStarted) return;
-      const powerFactor = gameState.thrustersOnline ? 1.0 : 0.3;
-      gameState.thrust.x = dx * GAME_CONFIG.manualThrustForce * powerFactor;
-      gameState.thrust.z = dz * GAME_CONFIG.manualThrustForce * powerFactor;
+      gameState.thrust.x = dx * GAME_CONFIG.manualThrustForce;
+      gameState.thrust.z = dz * GAME_CONFIG.manualThrustForce;
     }
     function stopThrust() { gameState.thrust.x = 0; gameState.thrust.z = 0; }
 
     function toggleAutoDP() {
       if (!gameState.isStarted) return;
       if (gameState.fuel <= 0) { alert("نفد الوقود: لا يمكن تشغيل الـ DP الآلي!"); return; }
-      if (!gameState.thrustersOnline) { alert("تحذير: القاطع الكهربائي مفصول! أعد ضبط القاطع أولاً."); return; }
       gameState.autoDP = !gameState.autoDP;
-    }
-
-    function triggerEmergency(type, title, desc, btnText, durationSec) {
-      gameState.activeEmergency = type;
-      gameState.emergencyTimer = durationSec;
-      
-      const banner = document.getElementById('emergencyBanner');
-      document.getElementById('emergencyTitle').textContent = title;
-      document.getElementById('emergencyDesc').textContent = desc;
-      document.getElementById('emergencyActionBtn').textContent = btnText;
-      document.getElementById('emergencyTimer').textContent = Math.ceil(durationSec) + "s";
-      
-      banner.style.display = 'flex';
-      banner.classList.remove('hidden');
-    }
-
-    function hideEmergencyBanner() {
-      gameState.activeEmergency = null;
-      const banner = document.getElementById('emergencyBanner');
-      banner.style.display = 'none';
-      banner.classList.add('hidden');
-    }
-
-    function resolveCurrentEmergency() {
-      if (gameState.activeEmergency === 'ballast') {
-        gameState.ballastTrimProgress = 1;
-        hideEmergencyBanner();
-      } else if (gameState.activeEmergency === 'thruster_trip') {
-        gameState.thrustersOnline = true;
-        hideEmergencyBanner();
-      }
-    }
-
-    function adjustTether(tetherId, delta) {
-      if (gameState.scenario !== 2) return;
-      gameState.tethers[tetherId] = Math.max(10, Math.min(100, gameState.tethers[tetherId] + delta));
-      document.getElementById('barTether' + tetherId).style.width = gameState.tethers[tetherId] + "%";
     }
 
     function updatePhysics(dt) {
@@ -1682,78 +1400,14 @@
       if (gameState.timeLeft <= 0) { triggerGameOver(false, "انتهت نافذة الطقس المتاحة قبل اكتمال التشييد!"); return; }
       if (gameState.budget <= 0) { triggerGameOver(false, "تجاوز المشروع الميزانية المخصصة وتوقفت العمليات!"); return; }
 
-      // ----------------------------------------------------
-      // التحديات الحصرية الخاصة بالمستوى 1 (GBS): موازنة صهاريج الغمر
-      // ----------------------------------------------------
-      if (gameState.scenario === 1 && gameState.phase === 2) {
-        if (gameState.craneLowerProgress > 0.35 && gameState.ballastTrimProgress === 0 && !gameState.activeEmergency) {
-          triggerEmergency('ballast', '⚠️ عدم اتزان صهاريج الغمر (Ballast Imbalance)!', 'اختلال مياه الموازنة يرفع زاوية الميلان خطراً. اضغط لتشغيل مضخات الموازنة قبل تصدع القاعدة!', '⚖️ تشغيل مضخات الموازنة (Trim Pumps)', 8.0);
-        }
-      }
-
-      // ----------------------------------------------------
-      // التحديات الحصرية الخاصة بالمستوى 2 (TLP): هبوب الرياح ومعايرة الأوتار
-      // ----------------------------------------------------
-      if (gameState.scenario === 2) {
-        if (Math.floor(gameState.timeElapsed) % 24 === 0 && gameState.squallTimeLeft <= 0 && gameState.timeElapsed > 5) {
-          gameState.squallTimeLeft = 6.0;
-          gameState.windVector = { x: (Math.random() - 0.5) * 0.16, z: (Math.random() - 0.5) * 0.16, speedKnots: 36 };
-          document.getElementById('valWind').textContent = "36 kts (GUST)";
-        }
-        if (gameState.squallTimeLeft > 0) {
-          gameState.squallTimeLeft -= clampedDt;
-          if (gameState.squallTimeLeft <= 0) {
-            gameState.windVector = { x: -0.05, z: 0.04, speedKnots: 20 };
-            document.getElementById('valWind').textContent = "20 kts (NW)";
-          }
-        }
-
-        if (gameState.phase === 4) {
-          gameState.tethers.N += (Math.random() - 0.5) * 0.3;
-          gameState.tethers.S += (Math.random() - 0.5) * 0.3;
-          gameState.tethers.E += (Math.random() - 0.5) * 0.3;
-          gameState.tethers.W += (Math.random() - 0.5) * 0.3;
-          
-          for (let key of ['N', 'S', 'E', 'W']) {
-            document.getElementById('barTether' + key).style.width = gameState.tethers[key] + "%";
-            if (gameState.tethers[key] >= 92) {
-              triggerGameOver(false, `كارثة بحرية! انقطع الوتر (${key}) بسبب فرط الشد الزائد مما أدى إلى انقلاب المنصة!`);
-              return;
-            } else if (gameState.tethers[key] <= 18) {
-              triggerGameOver(false, `فقدان السيطرة! ارتخى الوتر (${key}) بشكل حرج وفقدت المنصة استقرارها الرأسي.`);
-              return;
-            }
-          }
-        }
-      }
-
-      // ----------------------------------------------------
-      // التحديات الحصرية الخاصة بالمستوى 3 (Atlantic): أعطال الدوافع وخطر كسر ذراع الحفر
-      // ----------------------------------------------------
-      if (gameState.scenario === 3) {
-        if (gameState.phase === 2 && gameState.craneLowerProgress > 0.4 && gameState.thrustersOnline && !gameState.activeEmergency && Math.random() < 0.008) {
-          gameState.thrustersOnline = false;
-          triggerEmergency('thruster_trip', '⚡ عطل كهربائي: انقطاع الطاقة عن الدافع الرئيسي #2!', 'انفصل القاطع وانخفضت قوة الدوافع بنسبة 70%. اضغط لإعادة الضبط قبل الانجراف الكارثي!', '⚡ إعادة ضبط القاطع (Reset Breaker)', 7.0);
-        }
-        gameState.waveHeight = Math.min(3.5, 2.6 + (gameState.timeElapsed * 0.005));
-      }
-
-      if (gameState.activeEmergency) {
-        gameState.emergencyTimer -= clampedDt;
-        document.getElementById('emergencyTimer').textContent = Math.ceil(gameState.emergencyTimer) + "s";
-        if (gameState.emergencyTimer <= 0) {
-          if (gameState.activeEmergency === 'ballast') {
-            triggerGameOver(false, "فشلت المهمة! انغرست إحدى زوايا القاعدة الخرسانية في الرمل بسبب اختلال صهاريج الغمر وتصدع الهيكل.");
-          } else if (gameState.activeEmergency === 'thruster_trip') {
-            triggerGameOver(false, "كارثة بحرية! جرفت العاصفة سفينة الحفر بعيداً وانكسرت وصلة رأس البئر.");
-          }
-          return;
-        }
-      }
-
-      const driftX = gameState.windVector.x * (gameState.waveHeight * 0.45);
-      const driftZ = gameState.windVector.z * (gameState.waveHeight * 0.45);
-      gameState.rigVel.x += driftX * clampedDt; gameState.rigVel.z += driftZ * clampedDt;
+     // قوى الانجراف والأمواج الديناميكية الحقيقية
+      const t = clock.getElapsedTime();
+      const waveSurgeX = Math.cos(t * 1.1) * (gameState.waveHeight * 0.25);
+      const waveSurgeZ = Math.sin(t * 0.9) * (gameState.waveHeight * 0.25);
+      const driftX = gameState.windVector.x * GAME_CONFIG.driftFactor + waveSurgeX;
+      const driftZ = gameState.windVector.z * GAME_CONFIG.driftFactor + waveSurgeZ;
+      gameState.rigVel.x += driftX * clampedDt;
+      gameState.rigVel.z += driftZ * clampedDt;
 
       if (keysPressed['w'] || keysPressed['arrowup']) applyThrust(0, -1);
       else if (keysPressed['s'] || keysPressed['arrowdown']) applyThrust(0, 1);
@@ -1761,12 +1415,12 @@
       else if (keysPressed['d'] || keysPressed['arrowright']) applyThrust(1, 0);
 
       if (gameState.autoDP && gameState.fuel > 0) {
-        const targetThrustX = -gameState.rigPos.x * 0.25 - gameState.rigVel.x * 1.2;
-        const targetThrustZ = -gameState.rigPos.z * 0.25 - gameState.rigVel.z * 1.2;
+        const targetThrustX = -gameState.rigPos.x * 0.28 - gameState.rigVel.x * 1.2;
+        const targetThrustZ = -gameState.rigPos.z * 0.28 - gameState.rigVel.z * 1.2;
         gameState.rigVel.x += targetThrustX * clampedDt;
         gameState.rigVel.z += targetThrustZ * clampedDt;
         gameState.fuel = Math.max(0, gameState.fuel - GAME_CONFIG.autoDPFuelRate * clampedDt);
-        if (gameState.fuel === 0) gameState.autoDP = false;
+        if (gameState.fuel <= 0) gameState.autoDP = false;
       } else if (gameState.thrust.x !== 0 || gameState.thrust.z !== 0) {
         if (gameState.fuel > 0) {
           gameState.rigVel.x += gameState.thrust.x * clampedDt; gameState.rigVel.z += gameState.thrust.z * clampedDt;
@@ -1780,40 +1434,49 @@
       gameState.rigPos.z += gameState.rigVel.z * clampedDt;
 
       const totalDrift = Math.sqrt(gameState.rigPos.x ** 2 + gameState.rigPos.z ** 2);
-      const t = clock.getElapsedTime();
       const waveRoll = Math.sin(t * 1.2) * (gameState.waveHeight * 1.4);
       const wavePitch = Math.cos(t * 0.9) * (gameState.waveHeight * 1.0);
       gameState.tilt = Math.abs(waveRoll) + Math.abs(Math.sqrt(gameState.rigVel.x**2 + gameState.rigVel.z**2) * 0.5);
 
-      if (gameState.activeEmergency === 'ballast') {
-        gameState.tilt += 4.5;
-      }
-
       if (totalDrift > GAME_CONFIG.maxSafeDrift) {
-        gameState.integrity = Math.max(0, gameState.integrity - (totalDrift - GAME_CONFIG.maxSafeDrift) * 0.5 * clampedDt);
-      }
-
-      // في المستوى 3: زاوية الميلان الحرجة 10 درجات فقط لحماية ذراع الحفر (Riser)
-      if (gameState.scenario === 3 && gameState.tilt >= 10.0) {
-        triggerGameOver(false, "كارثة بيئية! تجاوزت زاوية الميلان 10 درجات مما أدى إلى قص وكسر أنبوب الحفر (Drill Riser Shear) وتسرب النفط!");
-        return;
+        gameState.integrity = Math.max(0, gameState.integrity - (totalDrift - GAME_CONFIG.maxSafeDrift) * 0.4 * clampedDt);
       }
 
       if (gameState.tilt >= GAME_CONFIG.criticalTilt || gameState.integrity <= 0) {
-        triggerGameOver(false, "انهيار هيكلي! تجاوزت زاوية الميلان الحد الحرج مما تسبب في كسر الأنابيب."); return;
+        triggerGameOver(false, "انهيار هيكلي! تجاوزت زاوية الميلان الحد الحرج مما تسبب في تصدع القاعدة."); return;
       }
 
-      if (gameState.phase === 2 && gameState.craneLowerProgress < 1) {
-        gameState.craneLowerProgress += clampedDt * 0.05;
+      // المرحلة 2: إنزال ونش القاعدة (تعمل يدوياً فقط بعد ضغط الزر، وتتوقف فور وصولها للقاع)
+      if (gameState.phase === 2 && gameState.isLoweringCrane && gameState.craneLowerProgress < 1) {
+        gameState.craneLowerProgress += clampedDt * 0.12;
         baseTemplateGroup.position.y = -5 - gameState.craneLowerProgress * 53;
-        if (gameState.craneLowerProgress >= 1) { gameState.craneLowerProgress = 1; advancePhase(3); }
-      } else if (gameState.phase === 3 && gameState.deckInstallProgress < 1) {
-        gameState.deckInstallProgress += clampedDt * 0.08; deckGroup.visible = true;
+        if (gameState.craneLowerProgress >= 1) {
+          gameState.craneLowerProgress = 1;
+          baseTemplateGroup.position.y = -58;
+          gameState.isLoweringCrane = false;
+          advancePhaseUI(3);
+        }
+      } 
+      // المرحلة 3: تركيب السطح (تعمل يدوياً فقط بعد ضغط الزر، وتتوقف فور استقراره)
+      else if (gameState.phase === 3 && gameState.isInstallingDeck && gameState.deckInstallProgress < 1) {
+        gameState.deckInstallProgress += clampedDt * 0.15;
+        deckGroup.visible = true;
         deckGroup.position.y = THREE.MathUtils.lerp(35, 14, gameState.deckInstallProgress);
-        if (gameState.deckInstallProgress >= 1) { deckGroup.position.y = 14; advancePhase(4); }
-      } else if (gameState.phase === 4 && gameState.pipesProgress < 1) {
-        gameState.pipesProgress += clampedDt * 0.09; pipeLinesGroup.visible = true;
-        if (gameState.pipesProgress >= 1) advancePhase(5);
+        if (gameState.deckInstallProgress >= 1) {
+          deckGroup.position.y = 14;
+          gameState.isInstallingDeck = false;
+          advancePhaseUI(4);
+        }
+      } 
+      // المرحلة 4: ربط الأنابيب وبدء التدفق (تعمل يدوياً فقط بعد ضغط الزر)
+      else if (gameState.phase === 4 && gameState.isConnectingPipes && gameState.pipesProgress < 1) {
+        gameState.pipesProgress += clampedDt * 0.18;
+        pipeLinesGroup.visible = true;
+        if (gameState.pipesProgress >= 1) {
+          gameState.pipesProgress = 1;
+          gameState.isConnectingPipes = false;
+          triggerVictory();
+        }
       }
 
       if (rigGroup) {
@@ -1876,21 +1539,43 @@
       else { dpStatus.textContent = "خطر: تجاوز دائرة الأمان!"; dpStatus.style.color = "var(--accent-danger)"; }
     }
 
+    // تنفيذ المراحل بقرار يدوي صارم من المهندس
     function executeCurrentPhase() {
       if (!gameState.isStarted) return;
       const btn = document.getElementById('btnMainAction');
       const drift = Math.sqrt(gameState.rigPos.x ** 2 + gameState.rigPos.z ** 2);
-      
+
+      // المرحلة 1: بدء الإنزال
       if (gameState.phase === 1) {
         if (drift > GAME_CONFIG.maxSafeDrift) {
-          alert(`تنبيه هندسي: في هذا المستوى لا يمكن بدء الإنزال حتى يكون الانحراف أقل من ${GAME_CONFIG.maxSafeDrift}م! اضبط التموضع أولاً.`);
+          alert(`تنبيه أمان: يجب أن يكون الانحراف أقل من ${GAME_CONFIG.maxSafeDrift}م لبدء الإنزال! اضبط التموضع بالدوافع أولاً.`);
           return;
         }
-        btn.disabled = true; btn.innerHTML = `<span>⏳ جاري إنزال ونش القاعدة البحرية...</span>`; advancePhase(2);
+        gameState.isLoweringCrane = true;
+        btn.disabled = true;
+        btn.innerHTML = `<span>⏳ جاري تشغيل ونش إنزال القاعدة البحرية...</span>`;
+        advancePhaseUI(2);
+      }
+      // المرحلة 3: رفع السطح العلوي
+      else if (gameState.phase === 3) {
+        if (drift > (GAME_CONFIG.maxSafeDrift * 1.4)) {
+          alert("تحذير: لا يمكن رفع السطح العلوي أثناء انجراف السفينة! ثبّت الموقع بالدوافع أولاً.");
+          return;
+        }
+        gameState.isInstallingDeck = true;
+        btn.disabled = true;
+        btn.innerHTML = `<span>⏳ جاري رفع وتجميع السطح وبرج الحفر...</span>`;
+      }
+      // المرحلة 4: ربط الأنابيب وبدء التدفق
+      else if (gameState.phase === 4) {
+        gameState.isConnectingPipes = true;
+        btn.disabled = true;
+        btn.innerHTML = `<span>⏳ جاري ربط الأنابيب وبدء تدفق البئر...</span>`;
       }
     }
 
-    function advancePhase(nextPhase) {
+    // تحديث الواجهة للمرحلة التالية وتفعيل الأزرار يدويًا
+    function advancePhaseUI(nextPhase) {
       gameState.phase = nextPhase;
       for (let i = 1; i <= 4; i++) {
         const el = document.getElementById('step' + i);
@@ -1903,32 +1588,24 @@
       const instruction = document.getElementById('phaseInstruction');
 
       if (nextPhase === 2) {
-        instruction.textContent = "⚙️ جاري تشغيل ونش الرافعة البحرية لإنزال القاعدة. حافظ على استقرار التموضع وتفادَ اختلال الصهاريج.";
+        instruction.textContent = "⚙️ جاري تشغيل ونش الرافعة لإنزال القاعدة. حافظ على التمركز حتى تستقر بالقاع.";
       } else if (nextPhase === 3) {
-        btn.disabled = false; btn.innerHTML = `<span>رفع وتثبيت السطح العلوي (Topsides)</span>`;
-        instruction.textContent = "🏗️ استقرت القاعدة في قاع البحر! اضغط لرفع وتجميع السطح وبرج الحفر.";
+        btn.disabled = false;
+        btn.innerHTML = `<span>🏗️ رفع وتثبيت السطح العلوي (Topsides)</span>`;
+        instruction.textContent = "✅ استقرت القاعدة البحرية بالقاع! اضغط الزر الآن للبدء برفع وتجميع السطح العلوي.";
       } else if (nextPhase === 4) {
-        btn.disabled = false; btn.innerHTML = `<span>معايرة كابلات الشد وربط الأنابيب</span>`;
-        instruction.textContent = "🔗 تم تثبيت السطح! المرحلة الأخيرة: معايرة شد أوتار التثبيت وبدء خط التدفق.";
-        if (gameState.scenario === 2) {
-          document.getElementById('tetherHud').classList.remove('hidden');
-        }
-      } else if (nextPhase === 5) {
-        if (gameState.scenario === 2) {
-          document.getElementById('tetherHud').classList.add('hidden');
-        }
-        triggerVictory();
+        btn.disabled = false;
+        btn.innerHTML = `<span>🔗 تثبيت الأنابيب وبدء خط التدفق</span>`;
+        instruction.textContent = "✅ تم تثبيت السطح بنجاح! اضغط الزر لتمديد أنابيب الإنتاج وبدء تدفق النفط.";
       }
     }
 
+    // إطلاق السيناريو والمستوى المختار مع تصفير شامل وفوري
     function startScenario(id) {
-    gameState.isStarted = true;
+      gameState.isStarted = true;
       gameState.scenario = id;
       gameState.phase = 1;
       gameState.timeElapsed = 0;
-      gameState.craneLowerProgress = 0;
-      gameState.deckInstallProgress = 0;
-      gameState.pipesProgress = 0;
       gameState.budget = 5000000;
       gameState.fuel = 100;
       gameState.integrity = 100;
@@ -1937,52 +1614,109 @@
       gameState.rigPos = { x: 0, z: 0 };
       gameState.rigVel = { x: 0, z: 0 };
       gameState.tilt = 0;
+
+      gameState.isLoweringCrane = false;
+      gameState.isInstallingDeck = false;
+      gameState.isConnectingPipes = false;
+      gameState.craneLowerProgress = 0;
+      gameState.deckInstallProgress = 0;
+      gameState.pipesProgress = 0;
+
+      if (baseTemplateGroup) baseTemplateGroup.position.set(0, -5, 0);
+      if (deckGroup) { deckGroup.position.y = 35; deckGroup.visible = false; }
+      if (pipeLinesGroup) pipeLinesGroup.visible = false;
+
+      const gameModal = document.getElementById('gameModal');
+      if (gameModal) {
+        gameModal.style.display = 'none';
+        gameModal.classList.add('hidden');
+      }
+
+      const badge = document.getElementById('scenarioBadge');
+
     if (id === 1) {
-        badge.textContent = "المستوى 1: المياه الضحلة (GBS)";
-        GAME_CONFIG.maxSafeDrift = 3.5;
-        GAME_CONFIG.criticalTilt = 20.0;
-        GAME_CONFIG.manualThrustForce = 1.3;
-        GAME_CONFIG.friction = 0.985; // احتكاك خفيف يسمح بالقصور الذاتي
-        GAME_CONFIG.autoDPFuelRate = 0.18;
-        GAME_CONFIG.budgetRatePerSec = 10000;
-        gameState.timeLeft = 120; // دقيقتان فقط
-        gameState.waveHeight = 0.8; 
-        gameState.windVector = { x: 0.035, z: 0.025, speedKnots: 12 };
-        document.getElementById('valWind').textContent = "12 kts (NNE)";
-        document.getElementById('step1Desc').textContent = "تثبيت المنصة في دائرة الأمان < 3.5م";
-        scene.background = new THREE.Color(0x0a2240); scene.fog = new THREE.FogExp2(0x0a2240, 0.006);
-        rainParticles.visible = false; ambientLight.intensity = 1.3;
+        if (badge) badge.textContent = "المستوى 1: المياه الضحلة (GBS)";
+        GAME_CONFIG.maxSafeDrift = 4.0;
+        GAME_CONFIG.criticalTilt = 24.0;
+        GAME_CONFIG.manualThrustForce = 1.6;
+        GAME_CONFIG.friction = 0.96;
+        GAME_CONFIG.autoDPFuelRate = 0.14;
+        GAME_CONFIG.budgetRatePerSec = 2500;
+        GAME_CONFIG.driftFactor = 3.5;
+        gameState.timeLeft = 180;
+        gameState.waveHeight = 0.6; 
+        gameState.windVector = { x: 0.18, z: 0.12, speedKnots: 8 };
+        document.getElementById('valWind').textContent = "8 kts (NNE)";
+        document.getElementById('step1Desc').textContent = "تثبيت المنصة في دائرة الأمان < 4.0م";
+        if (scene) {
+          scene.background = new THREE.Color(0x0a2240);
+          scene.fog = new THREE.FogExp2(0x0a2240, 0.006);
+        }
+        if (rainParticles) rainParticles.visible = false;
+        if (ambientLight) ambientLight.intensity = 1.3;
+        if (dirLight) { dirLight.color.setHex(0xffffff); dirLight.intensity = 1.5; }
       } else if (id === 2) {
-        badge.textContent = "المستوى 2: بحر الشمال (TLP)";
-        GAME_CONFIG.maxSafeDrift = 6.0;
-        GAME_CONFIG.criticalTilt = 16.0;
-        GAME_CONFIG.manualThrustForce = 1.5;
-        GAME_CONFIG.friction = 0.99; // قصور ذاتي عالٍ يتطلب دفعاً عكسياً لإيقاف المنصة
-        GAME_CONFIG.autoDPFuelRate = 0.45; // استنزاف وقود سريع جداً للـ DP الآلي
-        GAME_CONFIG.budgetRatePerSec = 16000;
-        gameState.timeLeft = 100;
-        gameState.waveHeight = 2.2; 
-        gameState.windVector = { x: -0.09, z: 0.07, speedKnots: 28 };
-        document.getElementById('valWind').textContent = "28 kts (NW)";
-        document.getElementById('step1Desc').textContent = "مقاومة التيارات العاتية والانجراف < 6.0م";
-        scene.background = new THREE.Color(0x111c2a); scene.fog = new THREE.FogExp2(0x111c2a, 0.006);
-        rainParticles.visible = true; ambientLight.intensity = 0.9;
+        if (badge) badge.textContent = "المستوى 2: بحر الشمال (TLP)";
+        GAME_CONFIG.maxSafeDrift = 5.5;
+        GAME_CONFIG.criticalTilt = 20.0;
+        GAME_CONFIG.manualThrustForce = 2.2;
+        GAME_CONFIG.friction = 0.965;
+        GAME_CONFIG.autoDPFuelRate = 0.32;
+        GAME_CONFIG.budgetRatePerSec = 4000;
+        GAME_CONFIG.driftFactor = 6.0;
+        gameState.timeLeft = 150;
+        gameState.waveHeight = 1.6; 
+        gameState.windVector = { x: -0.32, z: 0.24, speedKnots: 20 };
+        document.getElementById('valWind').textContent = "20 kts (NW)";
+        document.getElementById('step1Desc').textContent = "مقاومة التيارات وتثبيت التموضع < 5.5م";
+        if (scene) {
+          scene.background = new THREE.Color(0x111c2a);
+          scene.fog = new THREE.FogExp2(0x111c2a, 0.006);
+        }
+        if (rainParticles) rainParticles.visible = true;
+        if (ambientLight) ambientLight.intensity = 0.9;
+        if (dirLight) { dirLight.color.setHex(0xffffff); dirLight.intensity = 1.2; }
       } else if (id === 3) {
-        badge.textContent = "المستوى 3: المياه فائقة العمق (Atlantic Storm)";
-        GAME_CONFIG.maxSafeDrift = 7.5;
-        GAME_CONFIG.criticalTilt = 8.5; // زاوية ميلان حرجة صارمة (خطر قص ذراع الحفر)
-        GAME_CONFIG.manualThrustForce = 1.7;
-        GAME_CONFIG.friction = 0.994; // قصور ذاتي مائي شديد وسط الأمواج العاتية
-        GAME_CONFIG.autoDPFuelRate = 0.55;
-        GAME_CONFIG.budgetRatePerSec = 25000;
-        gameState.timeLeft = 90; // دقيقة ونصف في سباق مع الإعصار
-        gameState.waveHeight = 3.4; 
-        gameState.windVector = { x: 0.14, z: -0.11, speedKnots: 45 };
-        document.getElementById('valWind').textContent = "45 kts (ESE GALE)";
-        document.getElementById('step1Desc').textContent = "خطر كسر ذراع الحفر عند ميلان > 8.5 درجات!";
-        scene.background = new THREE.Color(0x050a12); scene.fog = new THREE.FogExp2(0x050a12, 0.006);
-        rainParticles.visible = true; ambientLight.intensity = 0.45;
-        dirLight.color.setHex(0x335588); dirLight.intensity = 0.4;
+        if (badge) badge.textContent = "المستوى 3: المياه فائقة العمق (Atlantic Storm)";
+        GAME_CONFIG.maxSafeDrift = 7.0;
+        GAME_CONFIG.criticalTilt = 18.0;
+        GAME_CONFIG.manualThrustForce = 3.0;
+        GAME_CONFIG.friction = 0.97;
+        GAME_CONFIG.autoDPFuelRate = 0.45;
+        GAME_CONFIG.budgetRatePerSec = 6000;
+        GAME_CONFIG.driftFactor = 8.5;
+        gameState.timeLeft = 130;
+        gameState.waveHeight = 2.6; 
+        gameState.windVector = { x: 0.45, z: -0.35, speedKnots: 32 };
+        document.getElementById('valWind').textContent = "32 kts (ESE GALE)";
+        document.getElementById('step1Desc').textContent = "عاصفة بحرية: الحفاظ على الميلان < 18°!";
+        if (scene) {
+          scene.background = new THREE.Color(0x050a12);
+          scene.fog = new THREE.FogExp2(0x050a12, 0.006);
+        }
+        if (rainParticles) rainParticles.visible = true;
+        if (ambientLight) ambientLight.intensity = 0.5;
+        if (dirLight) {
+          dirLight.color.setHex(0x335588);
+          dirLight.intensity = 0.5;
+        }
+      }
+
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById('step' + i);
+        if (el) el.className = "phase-step " + (i === 1 ? "active" : "");
+      }
+      const phasePercent = document.getElementById('phasePercent');
+      if (phasePercent) phasePercent.textContent = "0%";
+
+      const btn = document.getElementById('btnMainAction');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>بدء إنزال القاعدة البحرية</span>`;
+      }
+      const instruction = document.getElementById('phaseInstruction');
+      if (instruction) {
+        instruction.textContent = "💡 استخدم دوافع الـ DP للحفاظ على تمركز المنصة فوق الهدف أثناء تنفيذ مهام الرفع والإنزال.";
       }
     }
 
@@ -1990,13 +1724,17 @@
     function triggerGameOver(success, msg) {
       gameState.gameOver = true;
       gameState.isStarted = false;
-      hideEmergencyBanner();
       
       const modal = document.getElementById('gameModal');
       const card = document.getElementById('modalCard');
       const actionBtn = document.getElementById('modalActionBtn');
+      const scenarioList = document.getElementById('scenarioList');
+
       modal.style.display = 'flex';
-      modal.classList.remove('hidden'); actionBtn.classList.remove('hidden');
+      modal.classList.remove('hidden'); 
+      actionBtn.classList.remove('hidden');
+
+      if (scenarioList) scenarioList.classList.add('hidden');
 
       if (success) {
         card.className = "modal-card victory";
@@ -2004,10 +1742,10 @@
         
         let rankStars = "⭐⭐ B";
         let rankTitle = "مساعد مهندس ميداني (Junior Field Engineer)";
-        if (gameState.budget > 3500000 && gameState.integrity >= 80 && gameState.fuel >= 30) {
+        if (gameState.budget > 3200000 && gameState.integrity >= 80 && gameState.fuel >= 30) {
           rankStars = "⭐⭐⭐ A+";
           rankTitle = "مهندس استشاري بحري أول (Master Offshore Superintendent)";
-        } else if (gameState.budget > 2200000 && gameState.integrity >= 65) {
+        } else if (gameState.budget > 2000000 && gameState.integrity >= 65) {
           rankStars = "⭐⭐ A";
           rankTitle = "مهندس عمليات بحرية متمرس (Field Operations Engineer)";
         }
@@ -2027,14 +1765,21 @@
         `;
         document.getElementById('modalDesc').innerHTML = scoreHTML;
 
-        actionBtn.textContent = "الانتقال للمستوى التالي";
-        actionBtn.onclick = () => { if (gameState.scenario < 3) openLevelBriefing(gameState.scenario + 1); else openLevelBriefing(1); };
+        actionBtn.textContent = (gameState.scenario < 3) ? "الانتقال للمستوى التالي ◀" : "إعادة تشغيل المهمة الأولى";
+        actionBtn.onclick = () => {
+          if (scenarioList) scenarioList.classList.remove('hidden');
+          if (gameState.scenario < 3) startScenario(gameState.scenario + 1);
+          else startScenario(1);
+        };
       } else {
         card.className = "modal-card game-over";
         document.getElementById('modalTitle').textContent = "⚠️ فشلت المهمة!";
         document.getElementById('modalDesc').textContent = msg;
-        actionBtn.textContent = "إعادة تشغيل المهمة";
-        actionBtn.onclick = () => openLevelBriefing(gameState.scenario);
+        actionBtn.textContent = "🔄 إعادة المحاولة";
+        actionBtn.onclick = () => {
+          if (scenarioList) scenarioList.classList.remove('hidden');
+          startScenario(gameState.scenario);
+        };
       }
     }
 
@@ -2045,11 +1790,15 @@
       if (gameState.scenario === 1) {
         showLevel1FeedbackModal();
       } else {
-        triggerGameOver(true, "تم تثبيت المنصة وتشغيل منظومة التدفق والسيطرة بنجاح تحت المعايير الهندسية الدولية.");
+        triggerGameOver(true, "تم تثبيت المنصة وتشغيل منظومة التدفق والسيطرة بنجاح وفق المعايير الهندسية الدولية.");
       }
     }
 
-    function restartOrNext() { openLevelBriefing(gameState.scenario); }
+    function restartOrNext() {
+      const scenarioList = document.getElementById('scenarioList');
+      if (scenarioList) scenarioList.classList.remove('hidden');
+      startScenario(gameState.scenario);
+    }
 
     function toggleCameraView() {
       gameState.cameraViewIndex = (gameState.cameraViewIndex + 1) % 3;
@@ -2073,7 +1822,7 @@
     function setupCameraMouseControls() {
       let isDragging = false, prevMousePos = { x: 0, y: 0 };
       window.addEventListener('mousedown', (e) => {
-        if (e.target.closest('.interactive') || e.target.closest('.modal-card') || e.target.closest('#adminSecretTrigger') || e.target.closest('.card-admin-hotspot') || e.target.closest('.emergency-alert-banner')) return;
+        if (e.target.closest('.interactive') || e.target.closest('.modal-card') || e.target.closest('#adminSecretTrigger') || e.target.closest('.card-admin-hotspot')) return;
         isDragging = true; prevMousePos = { x: e.clientX, y: e.clientY };
       });
       window.addEventListener('mousemove', (e) => {
@@ -2106,6 +1855,10 @@
       animate();
       checkUserRegistration();
     };
+
+    function goToWellControl() {
+      window.location.href = 'well_control.html';
+    }
   </script>
 </body>
 </html>
