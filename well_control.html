@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>منصة محاكاة التحكم بالآبار المتقدمة | Offshore Well Control & BOP Simulator (IWCF / IADC Standard)</title>
+ <!-- زر العودة لمحاكي المنصات البحرية -->
+      <button type="button" onclick="goToOffshoreRig()" 
+        style="padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; background: #13243a; border: 1px solid #00d2ff; color: #00d2ff; cursor: pointer;">
+       ⚓ العودة لمحاكي المنصات البحرية ◀
+      </button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <style>
@@ -1560,6 +1565,10 @@ window.addEventListener('DOMContentLoaded', () => {
   startPhysicsLoop();
   setTimeout(() => { triggerKickEvent(); }, 4500);
 });
+
+ function goToOffshoreRig() {
+  window.location.href = 'index.html';
+}
 </script>
 </body>
 </html>
